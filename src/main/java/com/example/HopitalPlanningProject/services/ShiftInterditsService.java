@@ -15,7 +15,7 @@ public class ShiftInterditsService {
         this.shiftInterditsRepository = shiftInterditsRepository;
     }
 
-    public List<ShiftInterdits> getAllShiftsInterdits() {
+    public List<ShiftInterdits> getAllShiftInterdits() {
         return shiftInterditsRepository.findAll();
     }
 
@@ -23,7 +23,7 @@ public class ShiftInterditsService {
         return shiftInterditsRepository.findById(id);
     }
 
-    public ShiftInterdits createShiftInterdits(ShiftInterdits shiftInterdits) {
+    public ShiftInterdits saveShiftInterdits(ShiftInterdits shiftInterdits) {
         return shiftInterditsRepository.save(shiftInterdits);
     }
 

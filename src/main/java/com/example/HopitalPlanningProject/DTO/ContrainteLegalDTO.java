@@ -5,10 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ContrainteDTO {
-    private Long id;
-    private String dtype;
+public class ContrainteLegalDTO extends ContrainteDTO {
     private String type;
     private String description;
-    private String details;
 }

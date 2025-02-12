@@ -23,7 +23,7 @@ public class ContrainteService {
         return contrainteRepository.findById(id);
     }
 
-    public Contrainte createContrainte(Contrainte contrainte) {
+    public Contrainte saveContrainte(Contrainte contrainte) {
         return contrainteRepository.save(contrainte);
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/shifts-interdits")
+@RequestMapping("/api/shiftsInterdits")
 public class ShiftInterditsController {
     private final ShiftInterditsService shiftInterditsService;
 
@@ -17,8 +17,8 @@ public class ShiftInterditsController {
     }
 
     @GetMapping
-    public List<ShiftInterdits> getAllShiftsInterdits() {
-        return shiftInterditsService.getAllShiftsInterdits();
+    public List<ShiftInterdits> getAllShiftInterdits() {
+        return shiftInterditsService.getAllShiftInterdits();
     }
 
     @GetMapping("/{id}")
@@ -27,8 +27,8 @@ public class ShiftInterditsController {
     }
 
     @PostMapping
-    public ShiftInterdits createShiftInterdits(@RequestBody ShiftInterdits shiftInterdits) {
-        return shiftInterditsService.createShiftInterdits(shiftInterdits);
+    public ShiftInterdits saveShiftInterdits(@RequestBody ShiftInterdits shiftInterdits) {
+        return shiftInterditsService.saveShiftInterdits(shiftInterdits);
     }
 
     @DeleteMapping("/{id}")

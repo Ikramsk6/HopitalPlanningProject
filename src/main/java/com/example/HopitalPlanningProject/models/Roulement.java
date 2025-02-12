@@ -2,6 +2,8 @@ package com.example.HopitalPlanningProject.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,13 +13,37 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class Roulement {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    private List<Shift> shifts;
+    @ManyToMany
+    @JoinTable(
+            name = "roulement_shifts",
+            joinColumns = @JoinColumn(name = "roulement_id"),
+            inverseJoinColumns = @JoinColumn(name = "shift_id")
+    )
+    private List<Shift> shifts = new ArrayList<>();
 
-    @Column(nullable = false)
     private int dureeRoulement;
+
+    @ElementCollection
+    private List<String> contraintes = new ArrayList<>();
+
+
+    public boolean verifierContraintes() {
+        return !contraintes.isEmpty();
+    }
+
+
+    public void ajouterShift(Shift shift) {
+        this.shifts.add(shift);
+    }
+
+
+    public void genererRoulement() {
+        System.out.println("Génération du roulement...");
+        // Ici, on implémentera l'algorithme pour générer un roulement
+    }
 }

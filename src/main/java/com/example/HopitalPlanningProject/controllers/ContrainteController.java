@@ -27,8 +27,8 @@ public class ContrainteController {
     }
 
     @PostMapping
-    public Contrainte createContrainte(@RequestBody Contrainte contrainte) {
-        return contrainteService.createContrainte(contrainte);
+    public Contrainte saveContrainte(@RequestBody Contrainte contrainte) {
+        return contrainteService.saveContrainte(contrainte);
     }
 
     @DeleteMapping("/{id}")

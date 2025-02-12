@@ -1,6 +1,7 @@
 package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.models.Roulement;
+import com.example.HopitalPlanningProject.models.Shift;
 import com.example.HopitalPlanningProject.services.RoulementService;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,12 +28,17 @@ public class RoulementController {
     }
 
     @PostMapping
-    public Roulement createRoulement(@RequestBody Roulement roulement) {
-        return roulementService.createRoulement(roulement);
+    public Roulement saveRoulement(@RequestBody Roulement roulement) {
+        return roulementService.saveRoulement(roulement);
     }
 
     @DeleteMapping("/{id}")
     public void deleteRoulement(@PathVariable Long id) {
         roulementService.deleteRoulement(id);
+    }
+
+    @PostMapping("/{roulementId}/ajouterShift")
+    public void ajouterShiftAuRoulement(@PathVariable Long roulementId, @RequestBody Shift shift) {
+        roulementService.ajouterShiftAuRoulement(roulementId, shift);
     }
 }

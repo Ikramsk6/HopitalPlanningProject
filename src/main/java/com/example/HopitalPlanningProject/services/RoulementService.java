@@ -1,6 +1,7 @@
 package com.example.HopitalPlanningProject.services;
 
 import com.example.HopitalPlanningProject.models.Roulement;
+import com.example.HopitalPlanningProject.models.Shift;
 import com.example.HopitalPlanningProject.repositories.RoulementRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +24,19 @@ public class RoulementService {
         return roulementRepository.findById(id);
     }
 
-    public Roulement createRoulement(Roulement roulement) {
+    public Roulement saveRoulement(Roulement roulement) {
         return roulementRepository.save(roulement);
     }
 
     public void deleteRoulement(Long id) {
         roulementRepository.deleteById(id);
+    }
+
+    public void ajouterShiftAuRoulement(Long roulementId, Shift shift) {
+        Optional<Roulement> roulementOpt = roulementRepository.findById(roulementId);
+        roulementOpt.ifPresent(roulement -> {
+            roulement.ajouterShift(shift);
+            roulementRepository.save(roulement);
+        });
     }
 }

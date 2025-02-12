@@ -23,11 +23,19 @@ public class PlanningService {
         return planningRepository.findById(id);
     }
 
-    public Planning createPlanning(Planning planning) {
+    public Planning savePlanning(Planning planning) {
         return planningRepository.save(planning);
     }
 
     public void deletePlanning(Long id) {
         planningRepository.deleteById(id);
+    }
+
+    public void genererPlanning(Long planningId) {
+        Optional<Planning> planningOpt = planningRepository.findById(planningId);
+        planningOpt.ifPresent(planning -> {
+            planning.genererPlanning();
+            planningRepository.save(planning);
+        });
     }
 }

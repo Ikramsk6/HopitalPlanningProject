@@ -27,12 +27,17 @@ public class PlanningController {
     }
 
     @PostMapping
-    public Planning createPlanning(@RequestBody Planning planning) {
-        return planningService.createPlanning(planning);
+    public Planning savePlanning(@RequestBody Planning planning) {
+        return planningService.savePlanning(planning);
     }
 
     @DeleteMapping("/{id}")
     public void deletePlanning(@PathVariable Long id) {
         planningService.deletePlanning(id);
+    }
+
+    @PostMapping("/{planningId}/generer")
+    public void genererPlanning(@PathVariable Long planningId) {
+        planningService.genererPlanning(planningId);
     }
 }
