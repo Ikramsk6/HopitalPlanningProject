@@ -1,5 +1,6 @@
 package com.example.HopitalPlanningProject.models;
 
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,4 +21,12 @@ public class Personne {
 
     @Column(nullable = false)
     private String typeContrat; // 100%, 50%, 85%
+
+    @ManyToOne
+    @JoinColumn(name = "equipe_id")
+    private Equipe equipe;
+
+    @OneToMany(mappedBy = "personne")
+    private List<Preference> preferences;
+
 }

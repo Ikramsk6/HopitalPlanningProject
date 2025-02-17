@@ -22,4 +22,9 @@ public class Preference {
     private Shift shift;
 
     private int ecart;
+
+    @ManyToOne
+    @JoinColumn(name = "personne_id")
+    private Personne personne;
+
 }
