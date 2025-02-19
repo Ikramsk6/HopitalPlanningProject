@@ -3,9 +3,13 @@ package com.example.HopitalPlanningProject.controllers;
 import com.example.HopitalPlanningProject.models.Roulement;
 import com.example.HopitalPlanningProject.models.Shift;
 import com.example.HopitalPlanningProject.services.RoulementService;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -16,7 +20,24 @@ public class RoulementController {
     public RoulementController(RoulementService roulementService) {
         this.roulementService = roulementService;
     }
+    // parametre here is the roulement id . and it return a json contenant nbmaxroulement et taillemax roulement
+    // taille roulement est en semaines
+    // pour raphael il suffit seulement de faire un GET /api/roulements/{id}/infos
+    @GetMapping("/{id}/infos")
+    public ResponseEntity<Map<String, Integer>> getGeneralInfo(@PathVariable Long id) {
+        Optional<Roulement> optRoulement = roulementService.getRoulementById(id);
+        if (optRoulement.isPresent()) {
+            Roulement r = optRoulement.get();
+            Map<String, Integer> infos = new HashMap<>();
+            infos.put("nbMaxRoulement", r.getNbMaxRoulement());
+            infos.put("nbMaxTailleRoulement", r.getNbMaxTailleRoulement());
+            return ResponseEntity.ok(infos);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
+    
     @GetMapping
     public List<Roulement> getAllRoulements() {
         return roulementService.getAllRoulements();

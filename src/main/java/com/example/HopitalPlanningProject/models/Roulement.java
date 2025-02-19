@@ -31,6 +31,8 @@ public class Roulement {
     @ElementCollection
     private List<String> contraintes = new ArrayList<>();
 
+    private int nbMaxRoulement;
+    private int nbMaxTailleRoulement;
 
     public boolean verifierContraintes() {
         return !contraintes.isEmpty();
