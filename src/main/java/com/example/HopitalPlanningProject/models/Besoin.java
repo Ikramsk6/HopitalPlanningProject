@@ -17,5 +17,5 @@ public class Besoin {
     private Long id;
 
     @ElementCollection
-    private Map<String, int[]> besoinsParShift = new HashMap<>();
+    private Map<String, Integer> besoinsParShift = new HashMap<>();
 }
