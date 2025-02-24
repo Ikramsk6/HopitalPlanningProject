@@ -4,6 +4,7 @@ import com.example.HopitalPlanningProject.models.Besoin;
 import com.example.HopitalPlanningProject.services.BesoinService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,13 @@ public class BesoinController {
     @PostMapping
     public Besoin createBesoin(@RequestBody Besoin besoin) {
         return besoinService.createBesoin(besoin);
+    }
+
+    @PostMapping("/assign")
+    public Besoin assignBesoin(@RequestParam Long shiftId,
+                               @RequestParam LocalDate date,
+                               @RequestParam int nombrePersonnes) {
+        return besoinService.assignBesoinToShift(shiftId, date, nombrePersonnes);
     }
 
     @DeleteMapping("/{id}")

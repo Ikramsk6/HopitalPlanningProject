@@ -3,6 +3,9 @@ package com.example.HopitalPlanningProject.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -19,4 +22,8 @@ public class Shift {
 
     @Column(nullable = false)
     private String type; // Travail ou Repos
+
+    @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Besoin> besoins = new ArrayList<>();
 }
