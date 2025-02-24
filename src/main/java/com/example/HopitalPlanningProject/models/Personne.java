@@ -1,9 +1,9 @@
 package com.example.HopitalPlanningProject.models;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,6 +20,9 @@ public class Personne {
     private String nom;
 
     @Column(nullable = false)
+    private String prenom;
+
+    @Column(nullable = false)
     private String typeContrat; // 100%, 50%, 85%
 
     @ManyToOne
@@ -28,5 +31,4 @@ public class Personne {
 
     @OneToMany(mappedBy = "personne")
     private List<Preference> preferences;
-
 }

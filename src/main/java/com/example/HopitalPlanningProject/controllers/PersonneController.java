@@ -1,5 +1,6 @@
 package com.example.HopitalPlanningProject.controllers;
 
+import com.example.HopitalPlanningProject.DTO.PersonneDTO;
 import com.example.HopitalPlanningProject.models.Personne;
 import com.example.HopitalPlanningProject.services.PersonneService;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,10 @@ public class PersonneController {
     @DeleteMapping("/{id}")
     public void deletePersonne(@PathVariable Long id) {
         personneService.deletePersonne(id);
+    }
+
+    @PostMapping("/create-multiple/{equipeId}")
+    public void createPersonnesInEquipe(@PathVariable Long equipeId, @RequestBody List<PersonneDTO> personneDTOs) {
+        personneService.createPersonnesInEquipe(equipeId, personneDTOs);
     }
 }
