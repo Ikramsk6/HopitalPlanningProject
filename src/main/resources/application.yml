@@ -3,16 +3,19 @@ spring:
     name: HopitalPlanningProject
 
   datasource:
-    url: jdbc:mysql://localhost:3306/hospital_planning?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/hospital_planning?useSSL=false&serverTimezone=UTC
     username: root  # Mets ton utilisateur MySQL
     password: password  # Mets ton mot de passe MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update  # Pour créer/modifier les tables automatiquement
-    show-sql: true  # Afficher les requêtes SQL dans la console
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
   port: 8080  # Port de ton serveur Spring Boot
