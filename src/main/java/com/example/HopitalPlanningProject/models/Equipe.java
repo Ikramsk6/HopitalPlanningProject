@@ -26,12 +26,12 @@ public class Equipe {
     // Ajouter une personne dans l'équipe
     public void ajouterPersonne(Personne p) {
         listePersonnes.add(p);
-        this.tailleEquipe = listePersonnes.size(); // Mise à jour de la taille
+        this.tailleEquipe = listePersonnes.size();
     }
 
     //  Supprimer une personne de l'équipe
     public void supprimerPersonne(Personne p) {
         listePersonnes.remove(p);
-        this.tailleEquipe = listePersonnes.size(); // Mise à jour de la taille
+        this.tailleEquipe = listePersonnes.size();
     }
 }

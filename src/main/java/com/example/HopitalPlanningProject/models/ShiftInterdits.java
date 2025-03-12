@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -11,18 +12,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@DiscriminatorValue("SHIFT_INTERDITS") // Indique que cette contrainte concerne les shifts interdits
+@DiscriminatorValue("SHIFT_INTERDITS")
 public class ShiftInterdits extends Contrainte {
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)  //  Ajout du cascade
     @JoinTable(
             name = "shift_interdits",
             joinColumns = @JoinColumn(name = "contrainte_id"),
             inverseJoinColumns = @JoinColumn(name = "shift_id")
     )
-    private List<Shift> shiftsInterdits; // Liste des shifts qui ne peuvent pas être enchaînés
+    private List<Shift> shiftsInterdits = new ArrayList<>();
 
-    //  Obtenir les shifts interdits sous forme de texte
     public String getDetails() {
         return "Shifts interdits : " + shiftsInterdits.toString();
     }

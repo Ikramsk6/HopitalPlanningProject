@@ -26,8 +26,11 @@ public class ShiftController {
         return shiftService.getShiftById(id);
     }
 
-    @PostMapping
-    public Shift createShift(@RequestBody Shift shift) {
+    @PostMapping("/add")
+    public Shift addShift(@RequestParam String nom, @RequestParam String type) {
+        Shift shift = new Shift();
+        shift.setNom(nom);
+        shift.setType(type);
         return shiftService.createShift(shift);
     }
 

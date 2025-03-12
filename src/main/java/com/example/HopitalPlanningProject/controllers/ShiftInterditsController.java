@@ -1,5 +1,6 @@
 package com.example.HopitalPlanningProject.controllers;
 
+import com.example.HopitalPlanningProject.models.Shift;
 import com.example.HopitalPlanningProject.models.ShiftInterdits;
 import com.example.HopitalPlanningProject.services.ShiftInterditsService;
 import org.springframework.web.bind.annotation.*;
@@ -35,4 +36,17 @@ public class ShiftInterditsController {
     public void deleteShiftInterdits(@PathVariable Long id) {
         shiftInterditsService.deleteShiftInterdits(id);
     }
+
+    @PostMapping("/add")
+    public ShiftInterdits addShiftInterdits(@RequestParam String nom1, @RequestParam String type1,
+                                            @RequestParam String nom2, @RequestParam String type2) {
+        Shift shift1 = new Shift();
+        Shift shift2 = new Shift();
+
+        ShiftInterdits shiftInterdits = new ShiftInterdits();
+        shiftInterdits.setShiftsInterdits(List.of(shift1, shift2));
+
+        return shiftInterditsService.saveShiftInterdits(shiftInterdits);
+    }
+
 }

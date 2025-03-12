@@ -18,5 +18,5 @@ public class Shift {
     private String nom;
 
     @Column(nullable = false)
-    private String type; // Travail ou Repos
+    private String type;
 }
