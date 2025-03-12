@@ -2,28 +2,44 @@ package com.example.HopitalPlanningProject.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 /**
- * Représente un planning dans le système.
+ * Représente une personne dans le système.
  * Utilise Lombok pour générer les getters, setters, et autres méthodes utiles.
  */
 @Entity
 @Data
-public class Planning {
+public class Personne {
     /**
-     * L'identifiant unique du planning.
+     * L'identifiant unique de la personne.
      */
     @Id
-    private int idPlanning;
+    private int idPersonne;
 
     /**
-     * Le nombre maximum de semaines dans le planning.
+     * Le nom de la personne.
      */
-    private byte nbSemaineMax;
+    private String nom;
 
     /**
-     * Le nombre maximum de roulements dans le planning.
+     * Le prénom de la personne.
      */
-    private byte nbRoulementMax;
+    private String prenom;
+
+    /**
+     * Le contrat associé à la personne.
+     */
+    @ManyToOne
+    @JoinColumn(name = "idContrat")
+    private Contrat contrat;
+
+    /**
+     * L'équipe associée à la personne.
+     */
+    @ManyToOne
+    @JoinColumn(name = "idEquipe")
+    private Equipe equipe;
 }
