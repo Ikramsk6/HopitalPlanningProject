@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Personne {
+public class Planning {
     /**
      * L'identifiant unique de la personne.
      */

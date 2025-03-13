@@ -1,7 +1,7 @@
-package com.example.HopitalPlanningProject.controller;
+package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Personne;
-import com.example.HopitalPlanningProject.service.PersonneService;
+import com.example.HopitalPlanningProject.services.PersonneService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,15 +27,17 @@ public class PersonneController {
         return personneService.getPersonneById(id);
     }
 
-    @PostMapping
-    public Personne createPersonne(@RequestBody Personne personne) {
-        return personneService.createPersonne(personne);
-    }
+    // @PostMapping
+    // public Personne createPersonne(@RequestBody Personne personne) {
+    //     return personneService.createPersonne(personne);
+    // methode n existe pas dans le service 
+    // }
 
-    @PutMapping("/{id}")
-    public Personne updatePersonne(@PathVariable int id, @RequestBody Personne personne) {
-        return personneService.updatePersonne(id, personne);
-    }
+    // @PutMapping("/{id}")
+    // public Personne updatePersonne(@PathVariable int id, @RequestBody Personne personne) {
+    //     return personneService.updatePersonne(id, personne);
+    // methode n existe pas dans le service 
+    // }
 
     @DeleteMapping("/{id}")
     public void deletePersonne(@PathVariable int id) {

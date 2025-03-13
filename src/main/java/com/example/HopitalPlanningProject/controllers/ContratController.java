@@ -1,7 +1,7 @@
-package com.example.HopitalPlanningProject.controller;
+package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Contrat;
-import com.example.HopitalPlanningProject.service.ContratService;
+import com.example.HopitalPlanningProject.services.ContratService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,15 +27,17 @@ public class ContratController {
         return contratService.getContratById(id);
     }
 
-    @PostMapping
-    public Contrat createContrat(@RequestBody Contrat contrat) {
-        return contratService.createContrat(contrat);
-    }
+    // @PostMapping
+    // public Contrat createContrat(@RequestBody Contrat contrat) {
+    //     return contratService.createContrat(contrat);
+    //  methode n existe pas dans le service
+    // }
 
-    @PutMapping("/{id}")
-    public Contrat updateContrat(@PathVariable int id, @RequestBody Contrat contrat) {
-        return contratService.updateContrat(id, contrat);
-    }
+    // @PutMapping("/{id}")
+    // public Contrat updateContrat(@PathVariable int id, @RequestBody Contrat contrat) {
+    //     return contratService.updateContrat(id, contrat);
+    //  methode n existe pas dans le service 
+    // }
 
     @DeleteMapping("/{id}")
     public void deleteContrat(@PathVariable int id) {

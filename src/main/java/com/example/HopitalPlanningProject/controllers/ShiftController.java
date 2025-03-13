@@ -1,7 +1,7 @@
-package com.example.HopitalPlanningProject.controller;
+package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Shift;
-import com.example.HopitalPlanningProject.service.ShiftService;
+import com.example.HopitalPlanningProject.services.ShiftService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,10 +27,11 @@ public class ShiftController {
         return shiftService.getShiftById(id);
     }
 
-    @PostMapping
-    public Shift createShift(@RequestBody Shift shift) {
-        return shiftService.createShift(shift);
-    }
+    // @PostMapping
+    // public Shift createShift(@RequestBody Shift shift) {
+    //     // return shiftService.createShift(shift);
+    //     // methode n existe pas dans le service
+    // }
 
     @DeleteMapping("/{id}")
     public void deleteShift(@PathVariable int id) {

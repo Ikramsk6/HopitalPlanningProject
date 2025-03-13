@@ -1,7 +1,7 @@
-package com.example.HopitalPlanningProject.controller;
+package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Jour;
-import com.example.HopitalPlanningProject.service.JourService;
+import com.example.HopitalPlanningProject.services.JourService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,10 +27,11 @@ public class JourController {
         return jourService.getJourById(id);
     }
 
-    @PostMapping
-    public Jour createJour(@RequestBody Jour jour) {
-        return jourService.createJour(jour);
-    }
+    // @PostMapping
+    // public Jour createJour(@RequestBody Jour jour) {
+    //     return jourService.createJour(jour);
+    // methode n existe pas dans le service 
+    // }
 
     @DeleteMapping("/{id}")
     public void deleteJour(@PathVariable String id) {

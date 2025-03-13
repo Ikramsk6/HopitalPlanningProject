@@ -1,7 +1,7 @@
-package com.example.HopitalPlanningProject.controller;
+package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Roulement;
-import com.example.HopitalPlanningProject.service.RoulementService;
+import com.example.HopitalPlanningProject.services.RoulementService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,10 +27,11 @@ public class RoulementController {
         return roulementService.getRoulementById(id);
     }
 
-    @PostMapping
-    public Roulement createRoulement(@RequestBody Roulement roulement) {
-        return roulementService.createRoulement(roulement);
-    }
+    // @PostMapping
+    // public Roulement createRoulement(@RequestBody Roulement roulement) {
+    //     // return roulementService.createRoulement(roulement);
+    //     //  methode n existe pas dans le service aussi
+    // }
 
     @DeleteMapping("/{id}")
     public void deleteRoulement(@PathVariable int id) {

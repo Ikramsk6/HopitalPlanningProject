@@ -1,7 +1,7 @@
-package com.example.HopitalPlanningProject.controller;
+package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Equipe;
-import com.example.HopitalPlanningProject.service.EquipeService;
+import com.example.HopitalPlanningProject.services.EquipeService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,15 +27,15 @@ public class EquipeController {
         return equipeService.getEquipeById(id);
     }
 
-    @PostMapping
-    public Equipe createEquipe(@RequestBody Equipe equipe) {
-        return equipeService.createEquipe(equipe);
-    }
+    // @PostMapping
+    // public Equipe createEquipe(@RequestBody Equipe equipe) {
+    //     return equipeService.createEquipe(equipe);
+    // }
 
-    @PutMapping("/{id}")
-    public Equipe updateEquipe(@PathVariable int id, @RequestBody Equipe equipe) {
-        return equipeService.updateEquipe(id, equipe);
-    }
+    // @PutMapping("/{id}")
+    // public Equipe updateEquipe(@PathVariable int id, @RequestBody Equipe equipe) {
+    //     return equipeService.updateEquipe(id, equipe);
+    // }
 
     @DeleteMapping("/{id}")
     public void deleteEquipe(@PathVariable int id) {
