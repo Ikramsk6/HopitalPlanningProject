@@ -41,20 +41,20 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Lombok pour éviter d'écrire les getters et setters -->
+		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.28</version>
+			<version>1.18.30</version>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Annotation Processor Lombok -->
+		<!-- Lombok Annotation Processor -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok-mapstruct-binding</artifactId>
-			<version>0.2.0</version>
-			<scope>compile</scope>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Spring Boot Starter Test -->
