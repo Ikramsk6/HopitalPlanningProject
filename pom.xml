@@ -41,20 +41,11 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Lombok -->
+		<!-- Lombok (Unique déclaration pour éviter le problème de doublon) -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.30</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Lombok Annotation Processor -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.30</version>
-			<scope>test</scope>
 		</dependency>
 
 		<!-- Spring Boot Starter Test -->

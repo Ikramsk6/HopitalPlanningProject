@@ -1,39 +1,21 @@
 package com.example.HopitalPlanningProject.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-/**
- * Représente un shift dans le système.
- * Utilise Lombok pour générer les getters, setters et autres méthodes utiles.
- */
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class ShiftPoste {
-    /**
-     * L'identifiant unique du shift.
-     */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idShift;
 
-    /**
-     * Indique si le shift est un travail.
-     */
     private boolean travail;
-
-    /**
-     * Le tag du shift.
-     */
     private String tag;
-
-    /**
-     * Le type de shift.
-     */
     private String type;
-
-    /**
-     * Le poste du shift.
-     */
     private String poste;
 }

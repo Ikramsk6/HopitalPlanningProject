@@ -1,34 +1,30 @@
 package com.example.HopitalPlanningProject.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.io.Serializable;
+import lombok.*;
 
-/**
- * Représente une préférence générale.
- */
 @Entity
-@Data
-@IdClass(PreferenceGeneraleId.class)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class PreferenceGenerale {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
     @ManyToOne
     @JoinColumn(name = "idContrat")
     private Contrat contrat;
 
-    @Id
     @ManyToOne
     @JoinColumn(name = "idShift")
     private ShiftPoste shift;
 
-    @Id
     @ManyToOne
     @JoinColumn(name = "idJour")
     private Jour jour;
 
-    /**
-     * Nombre maximum de différences acceptées.
-     */
     private int nbMaxDifference;
 }

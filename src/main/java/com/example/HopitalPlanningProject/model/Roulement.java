@@ -1,24 +1,18 @@
 package com.example.HopitalPlanningProject.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-/**
- * Représente un roulement dans le système.
- * Utilise Lombok pour générer les getters, setters, et autres méthodes utiles.
- */
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Roulement {
-    /**
-     * L'identifiant unique du roulement.
-     */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idRoulement;
 
-    /**
-     * La taille du roulement.
-     */
     private String tailleRoulement;
 }
