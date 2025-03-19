@@ -9,11 +9,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Jour {
-    @Id
-    @Column(name = "idJour")
-    private int idJour;
+public class Besoin {
+    @EmbeddedId
+    private BesoinId id;
 
-    @Column(name = "Nom_Jour", length = 50, nullable = false)
-    private String nomJour;
+    @Column(name = "Valeur_souhaitée")
+    private short valeurSouhaitee;
+
 }

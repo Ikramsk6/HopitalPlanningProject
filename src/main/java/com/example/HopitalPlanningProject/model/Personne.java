@@ -12,16 +12,19 @@ import lombok.*;
 public class Personne {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idPersonne")
     private int idPersonne;
 
+    @Column(name = "Nom", nullable = false)
     private String nom;
+
+    @Column(name = "Prénom", nullable = false)
     private String prenom;
 
-    @ManyToOne
-    @JoinColumn(name = "idContrat")
-    private Contrat contrat;
+    @Column(name = "actif", nullable = false)
+    private boolean actif;
 
     @ManyToOne
-    @JoinColumn(name = "idEquipe")
-    private Equipe equipe;
+    @JoinColumn(name = "idContrat", nullable = false)
+    private Contrat contrat;
 }

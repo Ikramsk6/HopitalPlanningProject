@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-public class Solution {
+public class NonAffinite {
     @EmbeddedId
-    private SolutionId id;
-
-    private int semaineDebut;
+    private NonAffiniteId id;
 
     // Getters, setters et autres méthodes
 }
+
+

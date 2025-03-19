@@ -4,27 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
 public class PreferenceGenerale {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @EmbeddedId
+    private PreferenceGeneraleId id;
 
-    @ManyToOne
-    @JoinColumn(name = "idContrat")
-    private Contrat contrat;
+    private short nbMaxDifférence; // Maximum difference (e.g., max difference in shifts)
 
-    @ManyToOne
-    @JoinColumn(name = "idShift")
-    private ShiftPoste shift;
-
-    @ManyToOne
-    @JoinColumn(name = "idJour")
-    private Jour jour;
-
-    private int nbMaxDifference;
+    // Getters, setters et autres méthodes
 }
+

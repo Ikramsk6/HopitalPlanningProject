@@ -10,9 +10,14 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class Planning {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idPlanning;
+    private int idPlanning; // Primary Key
 
-    private String nomPlanning;
+    private byte nbSemaineMax;
+    private byte nbRoulementMax;
+    private int nbJoursMaxTravailConsecutifs;
+    private int nbJoursMinTravailConsecutifs;
+    private int frequenceWeekend;
 }

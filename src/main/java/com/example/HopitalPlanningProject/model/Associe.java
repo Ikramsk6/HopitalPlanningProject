@@ -1,14 +1,14 @@
 package com.example.HopitalPlanningProject.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import java.io.Serializable;
 
 @Entity
-public class Solution {
+public class Associe {
     @EmbeddedId
-    private SolutionId id;
+    private AssocieId id;
 
-    private int semaineDebut;
+
 
     // Getters, setters et autres méthodes
 }

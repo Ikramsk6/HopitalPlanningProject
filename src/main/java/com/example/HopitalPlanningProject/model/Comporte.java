@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-public class Solution {
-    @EmbeddedId
-    private SolutionId id;
+public class Comporte {
 
-    private int semaineDebut;
+    @EmbeddedId
+    private ComporteId id;
 
     // Getters, setters et autres méthodes
 }
+

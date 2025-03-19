@@ -1,5 +1,7 @@
-/*xpackage com.example.HopitalPlanningProject.controllers;
+package com.example.HopitalPlanningProject.controllers;
 
+
+import com.example.HopitalPlanningProject.model.ShiftPoste;
 import com.example.HopitalPlanningProject.services.ShiftPosteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,4 +25,3 @@ public class ShiftPosteController {
         return shiftPosteService.createShift(shiftPoste);
     }
 }
-*/

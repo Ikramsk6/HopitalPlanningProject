@@ -4,22 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
 public class InterdictionPrecedent {
+    @EmbeddedId
+    private InterdictionPrecedentId id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "idShift")
-    private ShiftPoste shift;
-
-    @ManyToOne
-    @JoinColumn(name = "idShift_1")
-    private ShiftPoste shift1;
+    // Getters, setters et autres méthodes
 }
+

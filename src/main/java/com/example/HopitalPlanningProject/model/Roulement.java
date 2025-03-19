@@ -14,5 +14,6 @@ public class Roulement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idRoulement;
 
-    private String tailleRoulement;
+    @Column(name = "Taille_Roulement", nullable = false)
+    private byte tailleRoulement;
 }

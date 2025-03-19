@@ -10,9 +10,10 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class Motif {
+
     @Id
-    private String idMotif;
+    private int idMotif; // Clé primaire
 
     private int nbMinApparitionMotif;
-    private int nbMaxApparitionMotif;
+    private String nbMaxApparitionMotif; // Peut être une chaîne (ex. "max 5 fois")
 }

@@ -1,6 +1,7 @@
-/*
+
 package com.example.HopitalPlanningProject.services;
 
+import com.example.HopitalPlanningProject.model.ShiftPoste;
 import com.example.HopitalPlanningProject.repositories.ShiftPosteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,4 +31,3 @@ public class ShiftPosteService {
         shiftPosteRepository.deleteById(id);
     }
 }
-*/

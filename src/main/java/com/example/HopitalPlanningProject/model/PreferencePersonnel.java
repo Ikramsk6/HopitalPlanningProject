@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-public class Solution {
+public class PreferencePersonnel {
     @EmbeddedId
-    private SolutionId id;
+    private PreferencePersonnelId id;
 
-    private int semaineDebut;
 
-    // Getters, setters et autres méthodes
+
 }
+
