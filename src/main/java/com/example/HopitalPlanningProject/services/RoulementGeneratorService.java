@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class RoulementGeneratorService {
@@ -14,9 +15,12 @@ public class RoulementGeneratorService {
     private final PersonneService personneService;
     private final InterdictionPrecedentService interdictionPrecedentService;
     private final SequenceShiftService sequenceShiftService;
+
     @Autowired
-    public RoulementGeneratorService(RoulementService roulementService, ShiftPosteService shiftPosteService,
-                                     PersonneService personneService, InterdictionPrecedentService interdictionPrecedentService,
+    public RoulementGeneratorService(RoulementService roulementService,
+                                     ShiftPosteService shiftPosteService,
+                                     PersonneService personneService,
+                                     InterdictionPrecedentService interdictionPrecedentService,
                                      SequenceShiftService sequenceShiftService) {
         this.roulementService = roulementService;
         this.shiftPosteService = shiftPosteService;
@@ -24,37 +28,74 @@ public class RoulementGeneratorService {
         this.interdictionPrecedentService = interdictionPrecedentService;
         this.sequenceShiftService = sequenceShiftService;
     }
+
     public Roulement generateRoulement() {
         List<ShiftPoste> shifts = shiftPosteService.getAllShifts();
         List<Personne> personnel = personneService.getAllPersonnes();
 
-        // La logique initiale pour créer un roulement vide ou basique
+        // Création initiale du roulement (tu peux initialiser la taille si nécessaire)
         Roulement roulement = new Roulement();
-        // Définir la taille du roulement, etc.
+        // Par exemple, définir une taille de roulement (en jours)
+        // roulement.setTailleRoulement((byte) 14);
         roulement = roulementService.saveRoulement(roulement);
 
-        // Ajouter des shifts au roulement en respectant les contraintes
-        for (ShiftPoste shift : shifts) {
-            // Vérifier les interdictions et les préférences avant d'ajouter le shift
-            if (checkConstraints(shift, roulement)) {
-                SequenceShift sequenceShift = new SequenceShift();
-                sequenceShift = sequenceShiftService.createSequence(sequenceShift);
-                // Associer la séquence au roulement, etc.
-            }
+        // Phase 1 : Placer les repos
+        placerLesRepos(roulement);
+
+        // Phase 2 : Placer les shifts
+        placerLesShifts(roulement);
+
+        // Évaluation finale du roulement selon les motifs et contraintes
+        if (!evaluerRoulement(roulement)) {
+            // En cas d'échec, supprimer le roulement et éventuellement lever une exception ou réessayer
+            roulementService.deleteRoulement(roulement.getIdRoulement());
+            throw new RuntimeException("Le roulement ne respecte pas les motifs requis.");
         }
 
         return roulement;
     }
 
+    private void placerLesRepos(Roulement roulement) {
+        // Implémente ici la logique pour placer les repos
+        // Par exemple, fixer 4 repos sur 2 semaines avec au moins 2 consécutifs incluant un dimanche
+        // Cette méthode sera à adapter selon tes besoins métier.
+        System.out.println("Placer les repos pour le roulement " + roulement.getIdRoulement());
+    }
+
+    private void placerLesShifts(Roulement roulement) {
+        List<ShiftPoste> shifts = shiftPosteService.getAllShifts();
+        Random random = new Random();
+
+        // Exemple d'assignation : on parcourt tous les shifts et on décide aléatoirement de les placer
+        for (ShiftPoste shift : shifts) {
+            // Simulation d'une décision : on tente de placer le shift
+            if (random.nextBoolean()) {
+                if (checkConstraints(shift, roulement)) {
+                    // Utilisation de getIdRoulement() pour obtenir l'identifiant généré
+                    SequenceShift sequenceShift = new SequenceShift(new SequenceShiftId(roulement.getIdRoulement(), shift.getIdShift()));
+                    sequenceShiftService.createSequence(sequenceShift);
+                }
+            }
+        }
+    }
+
     private boolean checkConstraints(ShiftPoste shift, Roulement roulement) {
-        // Exemple : vérifier les interdictions de séquence de shifts
+        // Exemple de vérification des contraintes d'interdiction sur le shift
         List<InterdictionPrecedent> interdictions = interdictionPrecedentService.getAllInterdictions();
         for (InterdictionPrecedent interdiction : interdictions) {
+            // Vérifie si le shift est interdit (adaptation selon ta logique)
             if (interdiction.getId().getIdShift() == shift.getIdShift()) {
-                // Logique pour vérifier si l'interdiction s'applique
+                System.out.println("Shift " + shift.getIdShift() + " interdit pour le roulement " + roulement.getIdRoulement());
+                return false;
             }
         }
         return true;
     }
 
+    private boolean evaluerRoulement(Roulement roulement) {
+        // Implémente ici la logique finale pour évaluer si le roulement respecte les motifs et contraintes (succession, fréquence weekend, etc.)
+        // Retourne false si le roulement ne respecte pas les contraintes.
+        System.out.println("Évaluation finale du roulement " + roulement.getIdRoulement());
+        return true;
+    }
 }
