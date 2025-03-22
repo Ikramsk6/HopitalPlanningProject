@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hospital_planning?useSSL=false&serverTimezone=UTC
     username: root  # Mets ton utilisateur MySQL
-    password: password  # Mets ton mot de passe MySQL
+    password: root  # Mets ton mot de passe MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -18,4 +18,4 @@ spring:
         format_sql: true
 
 server:
-  port: 8080  # Port de ton serveur Spring Boot
+  port: 8081  # Port de ton serveur Spring Boot
