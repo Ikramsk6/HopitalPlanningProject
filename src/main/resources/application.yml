@@ -3,7 +3,7 @@ spring:
     name: HopitalPlanningProject
 
   datasource:
-    url: jdbc:mysql://localhost:3306/hospital_planning?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/hospital_planning?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root  # Mets ton utilisateur MySQL
     password: LeGo:753Mat*  # Mets ton mot de passe MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver
