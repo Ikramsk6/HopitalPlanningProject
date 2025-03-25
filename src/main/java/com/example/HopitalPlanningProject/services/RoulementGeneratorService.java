@@ -7,12 +7,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Random;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
- * Service principal pour la génération de roulements hospitaliers.
- * Il se décompose en deux phases :
- * 1) La pose des repos.
- * 2) L'assignation des shifts sur les jours travaillés.
+ * Service de génération des roulements hospitaliers.
+ * La taille du roulement est saisie en semaines (entre 2 et 12) puis convertie en jours pour la génération.
+ * Pour un nombre impair de semaines, on génère initialement sur (weeks + 1) semaines (pour obtenir un nombre pair de semaines),
+ * puis on retire la dernière semaine fictive. Le roulement est constitué en deux phases :
+ *   1) La pose des repos (un pattern de 14 jours garantissant 4 repos, soit 1 weekend sur 2 off, est répliqué),
+ *   2) L'attribution des shifts sur les jours de travail.
  */
 @Service
 public class RoulementGeneratorService {
@@ -21,10 +25,8 @@ public class RoulementGeneratorService {
     private final ShiftPosteService shiftPosteService;
     private final InterdictionPrecedentService interdictionPrecedentService;
     private final SequenceShiftService sequenceShiftService;
+    private final Random random = new Random();
 
-    /**
-     * Constructeur pour l'injection par constructeur des services nécessaires.
-     */
     @Autowired
     public RoulementGeneratorService(RoulementService roulementService,
                                      ShiftPosteService shiftPosteService,
@@ -37,88 +39,96 @@ public class RoulementGeneratorService {
     }
 
     /**
-     * Méthode principale de génération d'un roulement complet.
-     * @return Le roulement généré et enregistré en base.
-     * @throws RuntimeException si le roulement ne satisfait pas les contraintes imposées.
+     * Génère un roulement complet.
+     * On part du principe que la propriété tailleRoulement de l'objet Roulement contient initialement
+     * le nombre de semaines souhaité (entre 2 et 12), puis on convertit cette valeur en jours.
+     * Si le nombre de semaines est impair, on ajoute une semaine fictive pour obtenir un nombre pair, puis on la retire.
+     *
+     * @return Le roulement généré.
      */
     public Roulement generateRoulement() {
-        // 1. Création initiale du roulement et enregistrement en base.
+        // Création initiale du roulement et enregistrement
         Roulement roulement = new Roulement();
         roulement = roulementService.saveRoulement(roulement);
 
-        // 2. Phase 1 : Poser les repos (sur 14 jours minimum).
-        placerLesRepos(roulement);
+        // Nombre de semaines fourni (doit être entre 2 et 12)
+        int weeksProvided = roulement.getTailleRoulement();
+        if (weeksProvided < 2) {
+            weeksProvided = 2; //POUR LE MOMENT ON MODIFIE LA TAILLE ICI
+        } else if (weeksProvided > 12) {
+            weeksProvided = 12;
+        }
+        // Pour faciliter la génération sur des blocs de 14 jours, si le nombre de semaines est impair,
+        // on ajoute une semaine fictive.
+        int effectiveWeeks = (weeksProvided % 2 == 1) ? weeksProvided + 1 : weeksProvided;
+        int effectiveDays = effectiveWeeks * 7;
+        // On stocke temporairement la taille en jours (on l'utilisera pour générer le planning)
+        roulement.setTailleRoulement((byte) effectiveDays);
 
-        // 3. Phase 2 : Poser les shifts (uniquement sur les jours de travail).
+        // Phase 1 : Génération et pose des repos
+        placerLesRepos(roulement, weeksProvided);
+
+        // Phase 2 : Attribution des shifts sur les jours de travail
         placerLesShifts(roulement);
 
-        // 4. Évaluation finale du roulement.
+        // Évaluation finale (à compléter selon vos règles métier)
         if (!evaluerRoulement(roulement)) {
-            // En cas d'échec, on supprime le roulement et on lève une exception.
             roulementService.deleteRoulement(roulement.getIdRoulement());
-            throw new RuntimeException("Le roulement ne respecte pas les motifs ou contraintes finales.");
+            throw new RuntimeException("Le roulement ne respecte pas les contraintes finales.");
         }
-
         return roulement;
     }
 
     /**
-     * Phase 1 : Pose des repos sur le roulement.
-     * - Assure 4 repos sur chaque fenêtre de 14 jours.
-     * - Assure un maximum de 6 jours de travail consécutifs.
-     * @param roulement L'objet Roulement dans lequel on stocke le planning de repos.
+     * Génère le planning de repos pour le roulement.
+     * Le planning est d'abord généré sur la période effective (en jours) calculée sur (weeksProvided+1) semaines
+     * puis, si le nombre de semaines fourni est impair, la dernière semaine (fictive) est retirée.
+     *
+     * @param roulement     Le roulement à compléter.
+     * @param weeksProvided Le nombre de semaines saisi initialement.
      */
-    private void placerLesRepos(Roulement roulement) {
-        // Détermine la taille du roulement (min 14 jours).
+    private void placerLesRepos(Roulement roulement, int weeksProvided) {
         int totalDays = roulement.getTailleRoulement();
-        if (totalDays < 14) {
-            totalDays = 14;
-            roulement.setTailleRoulement((byte) totalDays);
-        }
-
-        // Génère un pattern de base sur 14 jours (4 repos, max 6 jours consécutifs de travail).
+        // Génère un pattern de base sur 14 jours garantissant 4 repos.
         Integer[] basePattern = generateBasePatternForTwoWeeks();
 
-        // Recopie le pattern pour couvrir toute la durée du roulement.
-        Integer[] finalPattern = new Integer[totalDays];
+        // Réplique le pattern de base pour couvrir l'ensemble de la période effective.
+        Integer[] effectivePattern = new Integer[totalDays];
         int fullBlocks = totalDays / 14;
         int remainder = totalDays % 14;
-
-        // Copie bloc par bloc (14 jours).
         for (int i = 0; i < fullBlocks; i++) {
-            System.arraycopy(basePattern, 0, finalPattern, i * 14, 14);
+            System.arraycopy(basePattern, 0, effectivePattern, i * 14, 14);
         }
-        // Copie le reste s'il y a un reliquat.
         if (remainder > 0) {
-            System.arraycopy(basePattern, 0, finalPattern, fullBlocks * 14, remainder);
+            System.arraycopy(basePattern, 0, effectivePattern, fullBlocks * 14, remainder);
         }
 
-        // Vérification : chaque fenêtre glissante de 14 jours doit avoir exactement 4 repos.
-        for (int start = 0; start < totalDays; start++) {
+        // Si le nombre de semaines fourni est impair, retirer la dernière semaine fictive.
+        if (weeksProvided % 2 == 1) {
+            int finalLength = totalDays - 7;
+            effectivePattern = Arrays.copyOf(effectivePattern, finalLength);
+            totalDays = finalLength;
+        }
+
+        // Vérifier que pour chaque bloc complet de 14 jours dans le planning final, on a 4 repos.
+        // On vérifie uniquement les blocs complets.
+        for (int block = 0; block < totalDays / 14; block++) {
             int reposCount = 0;
             for (int j = 0; j < 14; j++) {
-                int index = start + j;
-                Integer val;
-                if (index < totalDays) {
-                    val = finalPattern[index];
-                } else {
-                    // Si on dépasse, on complète avec le début du pattern de base.
-                    val = basePattern[index - totalDays];
-                }
-                if (val != null && val == -1) {
+                if (effectivePattern[block * 14 + j] != null && effectivePattern[block * 14 + j] == -1) {
                     reposCount++;
                 }
             }
             if (reposCount != 4) {
-                throw new RuntimeException("La contrainte de 4 repos sur 14 jours n'est pas respectée "
-                        + "à partir du jour " + (start + 1) + " (repos = " + reposCount + ").");
+                throw new RuntimeException("Erreur: dans le bloc " + (block + 1) +
+                        ", 4 repos attendus, trouvés " + reposCount);
             }
         }
 
-        // Vérification : pas plus de 6 jours consécutifs de travail.
+        // Vérifier qu'il n'y a pas plus de 6 jours consécutifs de travail.
         int maxConsecutive = 0, current = 0;
         for (int i = 0; i < totalDays; i++) {
-            if (finalPattern[i] == null) { // Jour travaillé
+            if (effectivePattern[i] == null) {
                 current++;
                 maxConsecutive = Math.max(maxConsecutive, current);
             } else {
@@ -126,141 +136,156 @@ public class RoulementGeneratorService {
             }
         }
         if (maxConsecutive > 6) {
-            throw new RuntimeException("La contrainte de 6 jours consécutifs max n'est pas respectée (observé : "
-                    + maxConsecutive + ").");
+            throw new RuntimeException("Erreur: plus de 6 jours consécutifs de travail (" + maxConsecutive + " jours).");
         }
 
-        // Affichage pour vérification
-        System.out.println("Planning des repos (Roulement " + roulement.getIdRoulement() + ", " + totalDays + " jours) :");
+        // Affichage du planning de repos pour vérification.
+        System.out.println("Planning des repos pour le roulement " + roulement.getIdRoulement()
+                + " (" + totalDays + " jours) :");
         for (int i = 0; i < totalDays; i++) {
-            String status = (finalPattern[i] != null && finalPattern[i] == -1) ? "Repos" : "Vide";
+            String status = (effectivePattern[i] != null && effectivePattern[i] == -1) ? "Repos" : "Vide";
             System.out.println("Jour " + (i + 1) + ": " + status);
         }
 
-        // Stockage du planning de repos dans le roulement (sous forme de List<Integer>).
-        roulement.setPlanningRepos(Arrays.asList(finalPattern));
+        // Stocke le planning dans le roulement.
+        roulement.setPlanningRepos(Arrays.asList(effectivePattern));
     }
 
     /**
-     * Génère un pattern de 14 jours contenant exactement 4 repos :
-     *  - Choix aléatoire d'un weekend complet (samedi/dimanche) comme repos.
-     *  - Ajout de 2 repos additionnels aléatoires en semaine.
-     *  - Les jours travaillés sont marqués par null, les repos par -1.
-     * @return Un tableau de 14 jours, chaque case étant soit null (travail) soit -1 (repos).
+     * Génère un pattern de base sur 14 jours garantissant exactement 4 repos.
+     * La logique :
+     *   - Choix aléatoire d'un weekend complet à poser en repos (soit les jours 6-7, soit les jours 13-14),
+     *   - Deux repos additionnels sont placés aléatoirement parmi les jours restants.
+     *
+     * @return Un tableau de 14 Integer, où -1 représente un repos et null un jour de travail.
      */
     private Integer[] generateBasePatternForTwoWeeks() {
         Integer[] pattern = new Integer[14];
-        // Initialise tous les jours à null (travail).
-        for (int i = 0; i < 14; i++) {
-            pattern[i] = null;
-        }
-
-        Random random = new Random();
-        int weekendChoisi = random.nextInt(2); // 0 = premier weekend, 1 = deuxième weekend
-
-        // Marque le weekend choisi en repos
+        Arrays.fill(pattern, null);
+        int weekendChoisi = random.nextInt(2); // 0 = premier weekend, 1 = deuxième
+        int weekendStart, weekendEnd;
         if (weekendChoisi == 0) {
-            // Indices 5 et 6 (jours 6 et 7) : repos
-            pattern[5] = -1;
-            pattern[6] = -1;
+            weekendStart = 5;  // Jour 6
+            weekendEnd = 6;    // Jour 7
         } else {
-            // Indices 12 et 13 (jours 13 et 14) : repos
-            pattern[12] = -1;
-            pattern[13] = -1;
+            weekendStart = 12; // Jour 13
+            weekendEnd = 13;   // Jour 14
         }
+        pattern[weekendStart] = -1;
+        pattern[weekendEnd] = -1;
 
-        // Détermine les indices disponibles pour placer 2 repos supplémentaires.
-        int[] availableIndices = (weekendChoisi == 0)
-                ? new int[] {0, 1, 2, 3, 4, 7, 8, 9, 10, 11}
-                : new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-
-        // Place 2 repos additionnels de manière aléatoire.
-        int index1 = availableIndices[random.nextInt(availableIndices.length)];
-        int index2 = availableIndices[random.nextInt(availableIndices.length)];
-        while (index2 == index1) {
-            index2 = availableIndices[random.nextInt(availableIndices.length)];
+        // Prépare la liste des indices disponibles hors weekend non off.
+        List<Integer> availableIndices = new ArrayList<>();
+        for (int i = 0; i < 14; i++) {
+            if (i != weekendStart && i != weekendEnd) {
+                availableIndices.add(i);
+            }
         }
-        pattern[index1] = -1;
-        pattern[index2] = -1;
+        Collections.shuffle(availableIndices, random);
+        pattern[availableIndices.get(0)] = -1;
+        pattern[availableIndices.get(1)] = -1;
 
         return pattern;
     }
 
     /**
-     * Phase 2 : Assignation des shifts sur les jours de travail (cases null).
-     * @param roulement Le roulement sur lequel on place les shifts.
-     * @throws RuntimeException si aucun shift n'est autorisé pour un jour donné.
+     * Phase 2 : Attribution des shifts sur les jours de travail.
+     * Pour chaque jour dont le planning est "Vide" (null), on attribue un shift.
+     *
+     * @param roulement Le roulement à compléter.
      */
     private void placerLesShifts(Roulement roulement) {
-        // Récupère le planning de repos (cases = -1) et jours vides (cases = null).
         List<Integer> reposList = roulement.getPlanningRepos();
         if (reposList == null || reposList.isEmpty()) {
-            throw new RuntimeException("Aucun planning de repos n'est défini dans ce roulement.");
+            throw new RuntimeException("Le planning de repos n'est pas défini pour ce roulement.");
         }
         Integer[] planning = reposList.toArray(new Integer[0]);
+        int totalDays = planning.length;
 
+<<<<<<< HEAD
         int totalDays = roulement.getTailleRoulement();
 
         // Récupère tous les shifts disponibles
         List<ShiftPoste> shifts = shiftPosteService.getAllShiftPostes();
 
         // Parcourt chaque jour pour y assigner un shift si c'est un jour de travail
+=======
+        List<ShiftPoste> shifts = shiftPosteService.getAllShifts();
+        // Pour chaque jour de travail (case null), on attribue un shift autorisé.
+>>>>>>> origin/RoulementGenerator
         for (int i = 0; i < totalDays; i++) {
-            if (planning[i] == null) {  // Jour de travail
-                // Filtre les shifts autorisés pour ce jour
+            if (planning[i] == null) {
                 List<ShiftPoste> shiftsAutorises = getShiftsAutorisesForDay(i, planning, shifts);
-
                 if (shiftsAutorises.isEmpty()) {
                     throw new RuntimeException("Aucun shift autorisé pour le jour " + (i + 1));
                 }
-
-                // Choisit aléatoirement un shift parmi les autorisés
-                ShiftPoste shiftChoisi = shiftsAutorises.get(new Random().nextInt(shiftsAutorises.size()));
-
-                // Remplace null par l'ID du shift
+                ShiftPoste shiftChoisi = shiftsAutorises.get(random.nextInt(shiftsAutorises.size()));
                 planning[i] = shiftChoisi.getIdShift();
 
-                // Optionnel : crée et enregistre l'entité SequenceShift (association jour/shift)
-                SequenceShift sequenceShift =
-                        new SequenceShift(new SequenceShiftId(roulement.getIdRoulement(), shiftChoisi.getIdShift()));
-                sequenceShift.setOrdre(i + 1); // Ordre = numéro du jour
+                // Enregistre la séquence associant ce shift au roulement.
+                SequenceShift sequenceShift = new SequenceShift(new SequenceShiftId(roulement.getIdRoulement(), shiftChoisi.getIdShift()));
+                sequenceShift.setOrdre(i + 1);
                 sequenceShiftService.createSequence(sequenceShift);
             }
         }
 
-        // Affichage final pour vérification
+        // Affichage final du planning (repos et shifts)
         System.out.println("Planning complet du roulement " + roulement.getIdRoulement() + " :");
         for (int i = 0; i < totalDays; i++) {
-            // -1 = repos, sinon ID du shift
-            String dayInfo = (planning[i] != null && planning[i] == -1)
-                    ? "Repos"
-                    : "Shift ID " + planning[i];
-            System.out.println("Jour " + (i + 1) + ": " + dayInfo);
+            String info = (planning[i] != null && planning[i] == -1)
+                    ? "Repos" : "Shift ID " + planning[i];
+            System.out.println("Jour " + (i + 1) + ": " + info);
         }
-        // Possibilité de mettre à jour roulement.setPlanningRepos(Arrays.asList(planning)) si on veut sauvegarder le planning final.
+        roulement.setPlanningRepos(Arrays.asList(planning));
     }
 
     /**
      * Filtre les shifts autorisés pour un jour donné.
-     * @param dayIndex Index du jour (0-based).
-     * @param planning Tableau contenant -1 pour repos, null pour travail non assigné, ou l'ID d'un shift.
-     * @param shifts La liste de tous les shifts disponibles.
-     * @return La liste des shifts autorisés (sans contrainte supplémentaire, on renvoie tous les shifts).
+     * Cette méthode peut être étendue pour intégrer des règles (succession, interdictions, préférences, etc.).
+     *
+     * @param dayIndex L'indice du jour.
+     * @param planning Le planning actuel.
+     * @param shifts   La liste complète des shifts disponibles.
+     * @return La liste des shifts autorisés pour ce jour.
      */
     private List<ShiftPoste> getShiftsAutorisesForDay(int dayIndex, Integer[] planning, List<ShiftPoste> shifts) {
-        // Ici, tu peux appliquer des règles métier plus complexes (interdictions, successions, préférences...).
-        // Pour l'instant, on renvoie simplement tous les shifts.
+        // Pour cet exemple, on retourne simplement tous les shifts disponibles.
         return shifts;
     }
 
     /**
-     * Évalue la validité finale du roulement (après la pose des repos et des shifts).
+     * Évalue la validité finale du roulement selon des critères métier (motifs, succession, etc.).
+     *
      * @param roulement Le roulement à évaluer.
      * @return true si le roulement est valide, false sinon.
      */
     private boolean evaluerRoulement(Roulement roulement) {
         System.out.println("Évaluation finale du roulement " + roulement.getIdRoulement());
-        // Implémentez ici la logique finale (ex. motifs, successions de shifts, etc.).
+        // Ajoutez ici vos validations finales.
         return true;
+    }
+
+    /**
+     * Génère plusieurs roulements valides, affiche le nombre total et présente une dizaine d'exemples.
+     *
+     * @param count Le nombre de roulements à générer.
+     */
+    public void generateMultipleRoulements(int count) {
+        List<Roulement> validRoulements = new ArrayList<>();
+        int attempts = 0;
+        while (validRoulements.size() < count && attempts < count * 5) {
+            try {
+                Roulement r = generateRoulement();
+                validRoulements.add(r);
+            } catch (Exception e) {
+                System.out.println("Échec de génération d'un roulement : " + e.getMessage());
+            }
+            attempts++;
+        }
+        System.out.println(validRoulements.size() + " roulements valides générés sur " + attempts + " tentatives.");
+        // Affiche une dizaine d'exemples parmi les roulements trouvés.
+        for (int i = 0; i < Math.min(validRoulements.size(), validRoulements.size()); i++) {
+            System.out.println("Exemple Roulement " + (i+1) + " : " + validRoulements.get(i));
+        }
     }
 }
