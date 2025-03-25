@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ShiftPosteRepository extends JpaRepository<ShiftPoste, Integer> {
+    // Ajoute des méthodes spécifiques si nécessaire (par exemple, filtrage par tag ou poste)
 }

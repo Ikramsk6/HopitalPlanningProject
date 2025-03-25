@@ -7,11 +7,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service pour gérer les personnes.
- */
 @Service
 public class PersonneService {
+
     private final PersonneRepository personneRepository;
 
     public PersonneService(PersonneRepository personneRepository) {

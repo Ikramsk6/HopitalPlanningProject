@@ -10,18 +10,33 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class Contrat {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idContrat")
+    @Column(name = "id_contrat")
     private int idContrat;
 
-    @Column(name = "__contrat")
+    @Setter
+    @Getter
+    @Column(name = "pourcentage_travail", nullable = false)
     private double pourcentageTravail; // Ex: 100.00, 80.00
 
-    @Column(name = "Description_contrat", nullable = false)
+    @Setter
+    @Getter
+    @Column(name = "description_contrat", nullable = false)
     private String descriptionContrat;
 
     @OneToOne
-    @JoinColumn(name = "Id_Roulement", nullable = false, unique = true)
+    @JoinColumn(name = "id_roulement", nullable = false, unique = true)
     private Roulement roulement;
+
+    // Méthodes utilisées dans les tests
+    public int getId() {
+        return idContrat;
+    }
+
+    public void setId(int id) {
+        this.idContrat = id;
+    }
+
 }

@@ -202,7 +202,7 @@ public class RoulementGeneratorService {
         int totalDays = roulement.getTailleRoulement();
 
         // Récupère tous les shifts disponibles
-        List<ShiftPoste> shifts = shiftPosteService.getAllShifts();
+        List<ShiftPoste> shifts = shiftPosteService.getAllShiftPostes();
 
         // Parcourt chaque jour pour y assigner un shift si c'est un jour de travail
         for (int i = 0; i < totalDays; i++) {

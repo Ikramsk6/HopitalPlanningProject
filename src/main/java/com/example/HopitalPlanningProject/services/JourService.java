@@ -7,9 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service pour gérer les jours.
- */
 @Service
 public class JourService {
     private final JourRepository jourRepository;
@@ -22,7 +19,7 @@ public class JourService {
         return jourRepository.findAll();
     }
 
-    public Optional<Jour> getJourById(String id) {
+    public Optional<Jour> getJourById(int id) {
         return jourRepository.findById(id);
     }
 
@@ -30,7 +27,7 @@ public class JourService {
         return jourRepository.save(jour);
     }
 
-    public void deleteJour(String id) {
+    public void deleteJour(int id) {
         jourRepository.deleteById(id);
     }
 }

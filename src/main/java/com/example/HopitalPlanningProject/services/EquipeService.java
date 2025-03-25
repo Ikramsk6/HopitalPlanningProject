@@ -2,18 +2,18 @@ package com.example.HopitalPlanningProject.services;
 
 import com.example.HopitalPlanningProject.model.Equipe;
 import com.example.HopitalPlanningProject.repositories.EquipeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service pour gérer les équipes.
- */
 @Service
 public class EquipeService {
+
     private final EquipeRepository equipeRepository;
 
+    @Autowired
     public EquipeService(EquipeRepository equipeRepository) {
         this.equipeRepository = equipeRepository;
     }

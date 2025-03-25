@@ -13,7 +13,7 @@ public class DataInitializer {
 	public CommandLineRunner populateShiftPoste(ShiftPosteService shiftPosteService) {
 		return args -> {
 			// Vérifier si la table est déjà remplie
-			if (shiftPosteService.getAllShifts().isEmpty()) {
+			if (shiftPosteService.getAllShiftPostes().isEmpty()) {
 
 				// Exemple de shift "Matin"
 				ShiftPoste matin = new ShiftPoste();
@@ -21,7 +21,7 @@ public class DataInitializer {
 				matin.setTag("MAT");
 				matin.setType("Matin");
 				matin.setPoste("Service A"); // Adaptable selon vos besoins
-				shiftPosteService.createShift(matin);
+				shiftPosteService.saveShiftPoste(matin);
 
 				// Exemple de shift "Après-midi"
 				ShiftPoste apresMidi = new ShiftPoste();
@@ -29,7 +29,7 @@ public class DataInitializer {
 				apresMidi.setTag("APR");
 				apresMidi.setType("Après-midi");
 				apresMidi.setPoste("Service A");
-				shiftPosteService.createShift(apresMidi);
+				shiftPosteService.saveShiftPoste(apresMidi);
 
 				// Exemple de shift "Nuit"
 				ShiftPoste nuit = new ShiftPoste();
@@ -37,7 +37,7 @@ public class DataInitializer {
 				nuit.setTag("NUI");
 				nuit.setType("Nuit");
 				nuit.setPoste("Service A");
-				shiftPosteService.createShift(nuit);
+				shiftPosteService.saveShiftPoste(nuit);
 
 				// Vous pouvez ajouter d'autres shifts selon vos règles et services.
 				System.out.println("Table shift_poste initialisée avec succès.");
