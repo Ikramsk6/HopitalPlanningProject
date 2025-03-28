@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/api/personnes")
 public class PersonneController {
@@ -27,17 +28,16 @@ public class PersonneController {
         return personneService.getPersonneById(id);
     }
 
-    // @PostMapping
-    // public Personne createPersonne(@RequestBody Personne personne) {
-    //     return personneService.createPersonne(personne);
-    // methode n existe pas dans le service 
-    // }
+    @PostMapping
+    public Personne createPersonne(@RequestBody Personne personne) {
+        return personneService.savePersonne(personne);
+    }
 
-    // @PutMapping("/{id}")
-    // public Personne updatePersonne(@PathVariable int id, @RequestBody Personne personne) {
-    //     return personneService.updatePersonne(id, personne);
-    // methode n existe pas dans le service 
-    // }
+
+    @PutMapping("/{id}")
+    public Personne updatePersonne(@PathVariable int id, @RequestBody Personne personne) {
+        return personneService.updatePersonne(id, personne);
+    }
 
     @DeleteMapping("/{id}")
     public void deletePersonne(@PathVariable int id) {

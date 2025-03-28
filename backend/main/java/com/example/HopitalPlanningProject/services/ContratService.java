@@ -7,9 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service pour gérer les contrats.
- */
 @Service
 public class ContratService {
     private final ContratRepository contratRepository;
@@ -27,7 +24,13 @@ public class ContratService {
     }
 
     public Contrat saveContrat(Contrat contrat) {
-        return contratRepository.save(contrat);
+        return contratRepository.save(contrat); // Sauvegarde le contrat dans la base de données
+    }
+
+    public Contrat updateContrat(int id, Contrat contrat) {
+        // Logique de mise à jour si nécessaire, sinon implémente une mise à jour si nécessaire
+        contrat.setIdContrat(id); // Si l'ID est modifiable
+        return contratRepository.save(contrat); // Sauvegarde le contrat mis à jour
     }
 
     public void deleteContrat(int id) {

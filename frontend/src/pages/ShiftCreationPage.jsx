@@ -32,8 +32,8 @@ const ShiftCreationPage = () => {
     };
 
     const addShift = async () => {
-        if (!newShift.tag.trim() || !newShift.type.trim() || !newShift.poste.trim()) {
-            alert("Tous les champs doivent être remplis.");
+        if (!newShift.tag.trim() || !newShift.type.trim()) {
+            alert("Tous les champs obligatoires doivent être remplis.");
             return;
         }
         try {
@@ -63,6 +63,20 @@ const ShiftCreationPage = () => {
         }
     };
 
+    const deleteShift = async (idShift) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce shift ?")) return;
+        try {
+            setLoading(true);
+            await axios.delete(`http://localhost:8080/api/shiftsPostes/${idShift}`);
+            setShifts(shifts.filter(shift => shift.idShift !== idShift));
+            setLoading(false);
+        } catch (error) {
+            console.error("Error deleting shift:", error);
+            setError("Erreur lors de la suppression du shift.");
+            setLoading(false);
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setNewShift((prev) => ({ ...prev, [name]: value }));
@@ -70,7 +84,7 @@ const ShiftCreationPage = () => {
 
     return (
         <div className="container mt-4">
-            <h3 className="titre" style={{ fontSize: '2rem' }}>Création des Shifts</h3>
+            <h3 className="titre" style={{fontSize: '2rem'}}>Création des Shifts</h3>
 
             <div className="mb-3">
                 <input
@@ -80,7 +94,7 @@ const ShiftCreationPage = () => {
                     value={newShift.type}
                     onChange={handleChange}
                     placeholder="Entrez la description"
-                    style={{ width: '50%', margin: '0 auto' }} // Centrage et taille réduite
+                    style={{width: '50%', margin: '0 auto'}}
                 />
             </div>
             <div className="mb-3">
@@ -91,7 +105,7 @@ const ShiftCreationPage = () => {
                     value={newShift.tag}
                     onChange={handleChange}
                     placeholder="Entrez le tag"
-                    style={{ width: '50%', margin: '0 auto' }} // Centrage et taille réduite
+                    style={{width: '50%', margin: '0 auto'}}
                 />
             </div>
             <div className="mb-3">
@@ -101,8 +115,8 @@ const ShiftCreationPage = () => {
                     name="poste"
                     value={newShift.poste}
                     onChange={handleChange}
-                    placeholder="Entrez le poste"
-                    style={{ width: '50%', margin: '0 auto' }} // Centrage et taille réduite
+                    placeholder="Entrez le poste (facultatif)"
+                    style={{width: '50%', margin: '0 auto'}}
                 />
             </div>
             <div className="mb-3">
@@ -111,14 +125,15 @@ const ShiftCreationPage = () => {
                     name="travail"
                     value={newShift.travail}
                     onChange={handleChange}
-                    style={{ width: '50%', margin: '0 auto' }} // Centrage et taille réduite
+                    style={{width: '50%', margin: '0 auto'}}
                 >
                     <option value="true">Oui</option>
                     <option value="false">Non</option>
                 </select>
             </div>
 
-            <div className="d-flex justify-content-evenly mb-2"> {/* Réduction de l'espacement */}                <button className="btn btn-success" onClick={() => navigate("/employee-setup")}>
+            <div className="d-flex justify-content-evenly mb-2">
+                <button className="btn btn-success" onClick={() => navigate("/employee-setup")}>
                     Suivant
                 </button>
                 <button className="btn btn-primary" onClick={addShift}>
@@ -129,13 +144,31 @@ const ShiftCreationPage = () => {
                 </button>
             </div>
 
-            <ul className="mt-3">
+            <ul className="mt-3 list-unstyled">
                 {shifts.map((shift) => (
-                    <li key={shift.idShift}>
-                        <strong>{shift.tag}</strong> ({shift.type}) - <em>{shift.poste}</em> -{" "}
-                        <span className={shift.travail ? "text-success" : "text-danger"}>
-                        {shift.travail ? "Travail" : "Repos"}
-                    </span>
+                    <li
+                        key={shift.idShift}
+                        className="d-flex align-items-center justify-content-between border-bottom py-1"
+                    >
+                        <div>
+                            <strong>{shift.tag}</strong> ({shift.type}) - <em>{shift.poste}</em> -{" "}
+                            <span className={shift.travail ? "text-success" : "text-danger"}>
+                    {shift.travail ? "Travail" : "Repos"}
+                </span>
+                        </div>
+                        <button
+                            className="btn p-0 d-flex align-items-center justify-content-center"
+                            style={{
+                                width: "20px",
+                                height: "20px",
+                                background: "none",
+                                border: "none",
+                                color: "black",
+                            }}
+                            onClick={() => deleteShift(shift.idShift)}
+                        >
+                            ✖
+                        </button>
                     </li>
                 ))}
             </ul>

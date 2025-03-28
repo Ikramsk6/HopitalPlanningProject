@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/api/contrats")
 public class ContratController {
@@ -27,17 +28,18 @@ public class ContratController {
         return contratService.getContratById(id);
     }
 
-    // @PostMapping
-    // public Contrat createContrat(@RequestBody Contrat contrat) {
-    //     return contratService.createContrat(contrat);
-    //  methode n existe pas dans le service
-    // }
+    @PostMapping
+    public Contrat createContrat(@RequestBody Contrat contrat) {
+        if (contrat.getDescriptionContrat() == null || contrat.getPourcentageTravail() <= 0) {
+            throw new IllegalArgumentException("Description ou pourcentage de travail manquants");
+        }
+        return contratService.saveContrat(contrat);
+    }
 
-    // @PutMapping("/{id}")
-    // public Contrat updateContrat(@PathVariable int id, @RequestBody Contrat contrat) {
-    //     return contratService.updateContrat(id, contrat);
-    //  methode n existe pas dans le service 
-    // }
+    @PutMapping("/{id}")
+    public Contrat updateContrat(@PathVariable int id, @RequestBody Contrat contrat) {
+        return contratService.updateContrat(id, contrat); // Si tu implémente cette méthode dans le service
+    }
 
     @DeleteMapping("/{id}")
     public void deleteContrat(@PathVariable int id) {

@@ -45,5 +45,6 @@ public class DataInitializer {
 				System.out.println("Table shift_poste déjà peuplée.");
 			}
 		};
+
 	}
 }

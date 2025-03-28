@@ -30,6 +30,16 @@ public class PersonneService {
         return personneRepository.save(personne);
     }
 
+    // Méthode pour mettre à jour une personne
+    public Personne updatePersonne(int id, Personne personne) {
+        if (personneRepository.existsById(id)) {
+            // On garantit que l'ID de la personne à mettre à jour reste inchangé
+            personne.setIdPersonne(id);
+            return personneRepository.save(personne);
+        }
+        return null; // Ou vous pouvez lancer une exception si la personne n'existe pas
+    }
+
     public void deletePersonne(int id) {
         personneRepository.deleteById(id);
     }

@@ -1,6 +1,5 @@
 package com.example.HopitalPlanningProject.controllers;
 
-
 import com.example.HopitalPlanningProject.model.ShiftPoste;
 import com.example.HopitalPlanningProject.services.ShiftPosteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,20 @@ public class ShiftPosteController {
     // Ajout de la méthode DELETE pour supprimer tous les shifts
     @DeleteMapping
     public void deleteAllShifts() {
-        shiftPosteService.deleteAllShifts();
+        try {
+            shiftPosteService.deleteAllShifts();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la suppression de tous les shifts : " + e.getMessage());
+        }
+    }
+
+    // Nouvelle méthode pour supprimer un shift par son ID
+    @DeleteMapping("/{id}")
+    public void deleteShift(@PathVariable int id) {
+        try {
+            shiftPosteService.deleteShift(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la suppression du shift avec l'ID " + id + " : " + e.getMessage());
+        }
     }
 }

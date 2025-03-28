@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+
 public class Personne {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +28,6 @@ public class Personne {
     @ManyToOne
     @JoinColumn(name = "idContrat", nullable = false)
     private Contrat contrat;
+
+
 }
