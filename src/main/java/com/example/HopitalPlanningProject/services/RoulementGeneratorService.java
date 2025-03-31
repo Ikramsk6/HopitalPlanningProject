@@ -13,10 +13,10 @@ import java.util.Collections;
 /**
  * Service de génération des roulements hospitaliers.
  * La taille du roulement est saisie en semaines (entre 2 et 12) puis convertie en jours pour la génération.
- * Pour un nombre impair de semaines, on génère initialement sur (weeks + 1) semaines (pour obtenir un nombre pair de semaines),
+ * Pour un nombre impair de semaines, on génère initialement sur (weeks + 1) semaines afin d'obtenir une période paire,
  * puis on retire la dernière semaine fictive. Le roulement est constitué en deux phases :
- *   1) La pose des repos (un pattern de 14 jours garantissant 4 repos, soit 1 weekend sur 2 off, est répliqué),
- *   2) L'attribution des shifts sur les jours de travail.
+ *   1) La pose des repos (un pattern de 14 jours garantissant 4 repos, avec un weekend sur deux off, est répliqué),
+ *   2) L'attribution des shifts sur les jours de travail, avec interdiction de certaines successions.
  */
 @Service
 public class RoulementGeneratorService {
@@ -42,36 +42,36 @@ public class RoulementGeneratorService {
      * Génère un roulement complet.
      * On part du principe que la propriété tailleRoulement de l'objet Roulement contient initialement
      * le nombre de semaines souhaité (entre 2 et 12), puis on convertit cette valeur en jours.
-     * Si le nombre de semaines est impair, on ajoute une semaine fictive pour obtenir un nombre pair, puis on la retire.
+     * Pour un nombre impair de semaines, on ajoute une semaine fictive pour obtenir un nombre pair,
+     * puis on la retire à la fin.
      *
      * @return Le roulement généré.
      */
     public Roulement generateRoulement() {
-        // Création initiale du roulement et enregistrement
+        // Création et enregistrement initial du roulement.
         Roulement roulement = new Roulement();
         roulement = roulementService.saveRoulement(roulement);
 
-        // Nombre de semaines fourni (doit être entre 2 et 12)
+        // La taille est saisie en semaines (entre 2 et 12).
         int weeksProvided = roulement.getTailleRoulement();
         if (weeksProvided < 2) {
-            weeksProvided = 2; //POUR LE MOMENT ON MODIFIE LA TAILLE ICI
+            weeksProvided = 2;
         } else if (weeksProvided > 12) {
             weeksProvided = 12;
         }
-        // Pour faciliter la génération sur des blocs de 14 jours, si le nombre de semaines est impair,
+        // Pour faciliter la génération en blocs de 14 jours, si le nombre de semaines est impair,
         // on ajoute une semaine fictive.
         int effectiveWeeks = (weeksProvided % 2 == 1) ? weeksProvided + 1 : weeksProvided;
         int effectiveDays = effectiveWeeks * 7;
-        // On stocke temporairement la taille en jours (on l'utilisera pour générer le planning)
-        roulement.setTailleRoulement((byte) effectiveDays);
+        roulement.setTailleRoulement((byte) effectiveDays); // taille temporaire en jours
 
-        // Phase 1 : Génération et pose des repos
+        // Phase 1 : Génération et placement des repos.
         placerLesRepos(roulement, weeksProvided);
 
-        // Phase 2 : Attribution des shifts sur les jours de travail
+        // Phase 2 : Attribution des shifts sur les jours de travail.
         placerLesShifts(roulement);
 
-        // Évaluation finale (à compléter selon vos règles métier)
+        // Évaluation finale (à compléter selon vos règles métier).
         if (!evaluerRoulement(roulement)) {
             roulementService.deleteRoulement(roulement.getIdRoulement());
             throw new RuntimeException("Le roulement ne respecte pas les contraintes finales.");
@@ -80,19 +80,20 @@ public class RoulementGeneratorService {
     }
 
     /**
-     * Génère le planning de repos pour le roulement.
-     * Le planning est d'abord généré sur la période effective (en jours) calculée sur (weeksProvided+1) semaines
-     * puis, si le nombre de semaines fourni est impair, la dernière semaine (fictive) est retirée.
+     * Génère le planning de repos pour le roulement et le stocke dans l'objet.
+     * Le planning est généré sur une période effective (en jours) calculée sur (weeksProvided + 1) semaines,
+     * puis, si le nombre de semaines fourni est impair, la dernière semaine fictive est retirée.
      *
      * @param roulement     Le roulement à compléter.
      * @param weeksProvided Le nombre de semaines saisi initialement.
      */
     private void placerLesRepos(Roulement roulement, int weeksProvided) {
         int totalDays = roulement.getTailleRoulement();
-        // Génère un pattern de base sur 14 jours garantissant 4 repos.
+
+        // Génération du pattern de base sur 14 jours garantissant 4 repos.
         Integer[] basePattern = generateBasePatternForTwoWeeks();
 
-        // Réplique le pattern de base pour couvrir l'ensemble de la période effective.
+        // Réplication du pattern de base pour couvrir toute la période effective.
         Integer[] effectivePattern = new Integer[totalDays];
         int fullBlocks = totalDays / 14;
         int remainder = totalDays % 14;
@@ -103,15 +104,14 @@ public class RoulementGeneratorService {
             System.arraycopy(basePattern, 0, effectivePattern, fullBlocks * 14, remainder);
         }
 
-        // Si le nombre de semaines fourni est impair, retirer la dernière semaine fictive.
+        // Si le nombre de semaines fourni est impair, on retire la dernière semaine fictive.
         if (weeksProvided % 2 == 1) {
             int finalLength = totalDays - 7;
             effectivePattern = Arrays.copyOf(effectivePattern, finalLength);
             totalDays = finalLength;
         }
 
-        // Vérifier que pour chaque bloc complet de 14 jours dans le planning final, on a 4 repos.
-        // On vérifie uniquement les blocs complets.
+        // Vérification : pour chaque bloc complet de 14 jours, il doit y avoir exactement 4 repos.
         for (int block = 0; block < totalDays / 14; block++) {
             int reposCount = 0;
             for (int j = 0; j < 14; j++) {
@@ -125,7 +125,7 @@ public class RoulementGeneratorService {
             }
         }
 
-        // Vérifier qu'il n'y a pas plus de 6 jours consécutifs de travail.
+        // Vérification : pas plus de 6 jours consécutifs de travail.
         int maxConsecutive = 0, current = 0;
         for (int i = 0; i < totalDays; i++) {
             if (effectivePattern[i] == null) {
@@ -139,7 +139,7 @@ public class RoulementGeneratorService {
             throw new RuntimeException("Erreur: plus de 6 jours consécutifs de travail (" + maxConsecutive + " jours).");
         }
 
-        // Affichage du planning de repos pour vérification.
+        // Affichage du planning de repos.
         System.out.println("Planning des repos pour le roulement " + roulement.getIdRoulement()
                 + " (" + totalDays + " jours) :");
         for (int i = 0; i < totalDays; i++) {
@@ -153,9 +153,9 @@ public class RoulementGeneratorService {
 
     /**
      * Génère un pattern de base sur 14 jours garantissant exactement 4 repos.
-     * La logique :
-     *   - Choix aléatoire d'un weekend complet à poser en repos (soit les jours 6-7, soit les jours 13-14),
-     *   - Deux repos additionnels sont placés aléatoirement parmi les jours restants.
+     * La logique est la suivante :
+     * - Choix aléatoire d'un weekend complet à poser en repos (soit jours 6-7, soit jours 13-14),
+     * - Placement de deux repos additionnels choisis aléatoirement parmi les jours restants.
      *
      * @return Un tableau de 14 Integer, où -1 représente un repos et null un jour de travail.
      */
@@ -165,32 +165,38 @@ public class RoulementGeneratorService {
         int weekendChoisi = random.nextInt(2); // 0 = premier weekend, 1 = deuxième
         int weekendStart, weekendEnd;
         if (weekendChoisi == 0) {
-            weekendStart = 5;  // Jour 6
-            weekendEnd = 6;    // Jour 7
+            weekendStart = 5;
+            weekendEnd = 6;
         } else {
-            weekendStart = 12; // Jour 13
-            weekendEnd = 13;   // Jour 14
+            weekendStart = 12;
+            weekendEnd = 13;
         }
         pattern[weekendStart] = -1;
         pattern[weekendEnd] = -1;
 
-        // Prépare la liste des indices disponibles hors weekend non off.
+        // Préparer la liste des indices disponibles hors weekend non off.
         List<Integer> availableIndices = new ArrayList<>();
         for (int i = 0; i < 14; i++) {
-            if (i != weekendStart && i != weekendEnd) {
-                availableIndices.add(i);
+            // Si weekendChoisi est 0, on exclut le weekend 2 (indices 12 et 13)
+            // Si weekendChoisi est 1, on exclut le weekend 1 (indices 5 et 6)
+            if ((weekendChoisi == 0 && (i == 12 || i == 13)) ||
+                    (weekendChoisi == 1 && (i == 5 || i == 6))) {
+                continue;
             }
+            availableIndices.add(i);
         }
         Collections.shuffle(availableIndices, random);
         pattern[availableIndices.get(0)] = -1;
         pattern[availableIndices.get(1)] = -1;
-
         return pattern;
     }
 
     /**
      * Phase 2 : Attribution des shifts sur les jours de travail.
-     * Pour chaque jour dont le planning est "Vide" (null), on attribue un shift.
+     * Pour chaque jour où le planning est "Vide" (null), on attribue un shift autorisé.
+     * La méthode intègre une logique de succession : si le shift du jour précédent est présent,
+     * on vérifie dans la liste des interdictions (InterdictionPrecedent) que la paire (shift précédent, shift candidat)
+     * n'est pas interdite.
      *
      * @param roulement Le roulement à compléter.
      */
@@ -203,9 +209,8 @@ public class RoulementGeneratorService {
         int totalDays = planning.length;
 
         List<ShiftPoste> shifts = shiftPosteService.getAllShifts();
-        // Pour chaque jour de travail (case null), on attribue un shift autorisé.
         for (int i = 0; i < totalDays; i++) {
-            if (planning[i] == null) {
+            if (planning[i] == null) { // Jour de travail
                 List<ShiftPoste> shiftsAutorises = getShiftsAutorisesForDay(i, planning, shifts);
                 if (shiftsAutorises.isEmpty()) {
                     throw new RuntimeException("Aucun shift autorisé pour le jour " + (i + 1));
@@ -213,14 +218,12 @@ public class RoulementGeneratorService {
                 ShiftPoste shiftChoisi = shiftsAutorises.get(random.nextInt(shiftsAutorises.size()));
                 planning[i] = shiftChoisi.getIdShift();
 
-                // Enregistre la séquence associant ce shift au roulement.
+                // Enregistrer la séquence associant ce shift au roulement.
                 SequenceShift sequenceShift = new SequenceShift(new SequenceShiftId(roulement.getIdRoulement(), shiftChoisi.getIdShift()));
                 sequenceShift.setOrdre(i + 1);
                 sequenceShiftService.createSequence(sequenceShift);
             }
         }
-
-        // Affichage final du planning (repos et shifts)
         System.out.println("Planning complet du roulement " + roulement.getIdRoulement() + " :");
         for (int i = 0; i < totalDays; i++) {
             String info = (planning[i] != null && planning[i] == -1)
@@ -231,35 +234,52 @@ public class RoulementGeneratorService {
     }
 
     /**
-     * Filtre les shifts autorisés pour un jour donné.
-     * Cette méthode peut être étendue pour intégrer des règles (succession, interdictions, préférences, etc.).
+     * Filtre les shifts autorisés pour un jour donné en tenant compte des interdictions de succession.
+     * Si le jour précédent avait un shift (non repos), alors la paire (shift précédent, shift candidat)
+     * est vérifiée dans la liste des interdictions.
      *
-     * @param dayIndex L'indice du jour.
-     * @param planning Le planning actuel.
+     * @param dayIndex L'indice du jour courant.
+     * @param planning Le planning actuel (tableau de Integer).
      * @param shifts   La liste complète des shifts disponibles.
      * @return La liste des shifts autorisés pour ce jour.
      */
     private List<ShiftPoste> getShiftsAutorisesForDay(int dayIndex, Integer[] planning, List<ShiftPoste> shifts) {
-        // Pour cet exemple, on retourne simplement tous les shifts disponibles.
-        return shifts;
+        List<ShiftPoste> autorises = new ArrayList<>();
+        // Récupère la liste des interdictions
+        List<InterdictionPrecedent> interdictions = interdictionPrecedentService.getAllInterdictions();
+        // Détermine le shift du jour précédent, s'il existe et n'est pas un repos
+        Integer previousShiftId = (dayIndex > 0) ? planning[dayIndex - 1] : null;
+        for (ShiftPoste candidate : shifts) {
+            // Si un shift précédent existe, vérifier la paire interdite
+            if (previousShiftId != null && previousShiftId != -1) {
+                boolean interdite = interdictions.stream().anyMatch(i ->
+                        i.getId().getIdShift() == previousShiftId &&
+                                i.getId().getIdShift1() == candidate.getIdShift());
+                if (interdite) {
+                    continue; // Ce candidat n'est pas autorisé car il est interdit de suivre le shift précédent.
+                }
+            }
+            autorises.add(candidate);
+        }
+        return autorises;
     }
 
     /**
-     * Évalue la validité finale du roulement selon des critères métier (motifs, succession, etc.).
+     * Évalue la validité finale du roulement selon des critères métier (motifs, succession de shifts, etc.).
      *
      * @param roulement Le roulement à évaluer.
      * @return true si le roulement est valide, false sinon.
      */
     private boolean evaluerRoulement(Roulement roulement) {
         System.out.println("Évaluation finale du roulement " + roulement.getIdRoulement());
-        // Ajoutez ici vos validations finales.
+        // Ajoutez ici vos règles de validation finale.
         return true;
     }
 
     /**
-     * Génère plusieurs roulements valides, affiche le nombre total et présente une dizaine d'exemples.
+     * Génère plusieurs roulements valides, affiche le nombre total obtenu et présente une dizaine d'exemples.
      *
-     * @param count Le nombre de roulements à générer.
+     * @param count Le nombre de roulements souhaité.
      */
     public void generateMultipleRoulements(int count) {
         List<Roulement> validRoulements = new ArrayList<>();
@@ -273,10 +293,16 @@ public class RoulementGeneratorService {
             }
             attempts++;
         }
-        System.out.println(validRoulements.size() + " roulements valides générés sur " + attempts + " tentatives.");
-        // Affiche une dizaine d'exemples parmi les roulements trouvés.
-        for (int i = 0; i < Math.min(validRoulements.size(), validRoulements.size()); i++) {
-            System.out.println("Exemple Roulement " + (i+1) + " : " + validRoulements.get(i));
+        if (validRoulements.size() < count) {
+            System.out.println("Seuls " + validRoulements.size()
+                    + " roulements ont pu être générés sur " + attempts + " tentatives.");
+        } else {
+            System.out.println(validRoulements.size()
+                    + " roulements valides générés sur " + attempts + " tentatives.");
+        }
+        // Affiche jusqu'à x exemples parmi les roulements valides.
+        for (int i = 0; i < Math.min(100, validRoulements.size()); i++) {
+            System.out.println("Exemple Roulement " + (i + 1) + " : " + validRoulements.get(i));
         }
     }
 }
