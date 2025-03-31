@@ -16,6 +16,7 @@ const PersonneSetupPage = () => {
         actif: true,
         preferences: []
     });
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -59,9 +60,7 @@ const PersonneSetupPage = () => {
         }
 
         try {
-
-
-            const response = await axios.post("http://localhost:8080/api/personnes", newPersonne); // Vérifie bien que "/api/personnes" est le bon endpoint
+            const response = await axios.post("http://localhost:8080/api/personnes/create", newPersonne); // Vérifie bien que "/api/personnes" est le bon endpoint
             setPersonnes([response.data, ...personnes]);
 
             console.log("Réponse du serveur :", response.data); // Affiche la réponse reçue
@@ -138,15 +137,17 @@ const PersonneSetupPage = () => {
                 <select
                     className="form-control"
                     name="contract"
-                    value={newPersonne.contract}
-                    onChange={(e) => setNewPersonne({...newPersonne, contract: e.target.value})}
-                    style={{width: '50%', margin: '0 auto'}}
+                    value={newPersonne.contract ? newPersonne.contract.idContrat : ""}
+                    onChange={(e) => {
+                        const selectedContract = contracts.find(contract => contract.idContrat === parseInt(e.target.value));
+                        setNewPersonne({...newPersonne, contract: selectedContract});
+                    }}
+                    style={{width: "50%", margin: "0 auto"}}
                 >
-                    <option value="100%">100%</option>
-                    <option value="50%">50%</option>
+                    <option value="">Sélectionner un contrat</option>
                     {contracts.map((contract) => (
-                        <option key={contract.idContrat} value={contract.libelle}>
-                            {contract.libelle}
+                        <option key={contract.idContrat} value={contract.idContrat}>
+                            {contract.descriptionContrat} ({contract.pourcentageTravail}%)
                         </option>
                     ))}
                 </select>
@@ -173,8 +174,7 @@ const PersonneSetupPage = () => {
                 {daysOfWeek.map((day) => (
                     <div key={day}>
                         <h5>{day}</h5>
-                        {shifts.map((shift, index) => (
-                            <button
+                        {Array.isArray(shifts) && shifts.map((shift, index) => (<button
                                 key={index}
                                 className="btn btn-info m-1"
                                 onClick={() => addPreference(day, shift.type, shift.poste)}  // Utilisez 'type' pour le shift et 'poste' pour le service
@@ -216,17 +216,6 @@ const PersonneSetupPage = () => {
                 </ul>
             </div>
 
-            <div className="d-flex justify-content-evenly mb-2">
-                <button className="btn btn-success" onClick={onNext}>
-                    Suivant
-                </button>
-                <button className="btn btn-primary" onClick={addPersonne}>
-                    + Ajouter
-                </button>
-                <button className="btn btn-danger" onClick={() => setPersonnes([])}>
-                    Supprimer tout
-                </button>
-            </div>
 
             <div className="mt-4">
                 <h4>Liste des personnes :</h4>
@@ -256,6 +245,18 @@ const PersonneSetupPage = () => {
                         </li>
                     ))}
                 </ul>
+            </div>
+
+            <div className="d-flex justify-content-evenly mb-2">
+                <button className="btn btn-success" onClick={onNext}>
+                    Suivant
+                </button>
+                <button className="btn btn-primary" onClick={addPersonne}>
+                    + Ajouter
+                </button>
+                <button className="btn btn-danger" onClick={() => setPersonnes([])}>
+                    Supprimer tout
+                </button>
             </div>
         </div>
     );

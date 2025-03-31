@@ -2,6 +2,7 @@ package com.example.HopitalPlanningProject.controllers;
 
 import com.example.HopitalPlanningProject.model.Personne;
 import com.example.HopitalPlanningProject.services.PersonneService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +29,15 @@ public class PersonneController {
         return personneService.getPersonneById(id);
     }
 
-    @PostMapping
-    public Personne createPersonne(@RequestBody Personne personne) {
-        return personneService.savePersonne(personne);
+    @PostMapping("/create")
+    public ResponseEntity<Personne> createPersonne(@RequestBody Personne personne) {
+        if (personne.getContrat() == null) {
+            throw new IllegalArgumentException("Contrat is required");
+        }
+        personneService.savePersonne(personne);
+        return ResponseEntity.ok(personne);
     }
+
 
 
     @PutMapping("/{id}")

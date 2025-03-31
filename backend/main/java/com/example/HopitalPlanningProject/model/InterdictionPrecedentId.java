@@ -10,13 +10,15 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class InterdictionPrecedentId implements Serializable {
     private int idShift;
     private int idShift1;
 
-    // Implémentation de equals et hashCode
+    public InterdictionPrecedentId(int idShift, int idShift1) {
+        this.idShift = idShift;
+        this.idShift1 = idShift1;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

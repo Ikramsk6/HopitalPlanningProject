@@ -6,10 +6,16 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class InterdictionPrecedent {
     @EmbeddedId
     private InterdictionPrecedentId id;
 
+    // Relation ManyToOne avec ShiftPoste
+    @ManyToOne
+    @JoinColumn(name = "idShift", insertable = false, updatable = false)
+    private ShiftPoste shiftPoste;
 }
+

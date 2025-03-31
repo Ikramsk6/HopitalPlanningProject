@@ -1,7 +1,7 @@
 package com.example.HopitalPlanningProject;
 
-import com.example.HopitalPlanningProject.model.Roulement;
 import com.example.HopitalPlanningProject.services.RoulementGeneratorService;
+import com.example.HopitalPlanningProject.services.ContratService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
@@ -20,14 +20,18 @@ public class HopitalPlanningProjectApplication {
 	}
 
 	/**
-	 * CommandLineRunner qui génère plusieurs roulements valides
+	 * CommandLineRunner qui génère plusieurs roulements valides,
+	 * initialise les contrats par défaut (100% et 50%),
 	 * et affiche une dizaine d'exemples pour vérification.
 	 */
 	@Bean
-	public CommandLineRunner demo(RoulementGeneratorService generatorService) {
+	public CommandLineRunner demo(RoulementGeneratorService generatorService, ContratService contratService) {
 		return args -> {
-			// Génère 50 roulements valides.
+			// Génère 50 roulements valides
 			generatorService.generateMultipleRoulements(50);
+
+			// Initialise les contrats par défaut (100% et 50%)
+			contratService.initializeDefaultContrats();
 		};
 	}
 }

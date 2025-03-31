@@ -2,6 +2,10 @@ package com.example.HopitalPlanningProject.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -9,7 +13,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-
 public class Personne {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +29,10 @@ public class Personne {
     private boolean actif;
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "idContrat", nullable = false)
     private Contrat contrat;
 
-
+    @OneToMany(mappedBy = "personne", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PreferencePersonnel> preferences = new ArrayList<>();
 }

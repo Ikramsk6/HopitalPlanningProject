@@ -51,9 +51,12 @@ const ForbiddenShiftsPage = () => {
     try {
       // Create a flat payload with idShift and idShift1 as integers
       const payload = {
-        idShift: parseInt(firstShift, 10),
-        idShift1: parseInt(secondShift, 10)
+        id: {
+          idShift: parseInt(firstShift, 10),
+          idShift1: parseInt(secondShift, 10)
+        }
       };
+
       await axios.post("http://localhost:8080/api/interdictionsPrecedents", payload);
       fetchInterdictions();
       setFirstShift("");
@@ -63,7 +66,7 @@ const ForbiddenShiftsPage = () => {
       alert("Erreur lors de l'enregistrement de l'interdiction.");
     }
   };
-    
+
 
   // Delete an interdiction
   const removeInterdiction = async (idShift, idShift1) => {
@@ -77,76 +80,89 @@ const ForbiddenShiftsPage = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h3 className="text-primary">Shifts Interdits</h3>
+      <div className="container mt-4">
+        <h3 className="titre" style={{fontSize: "2rem"}}>Shifts Interdits</h3>
 
-      {/* First Shift Dropdown */}
-      <div className="mb-3">
-        <label>Premier Shift :</label>
-        <select
-          className="form-control"
-          value={firstShift}
-          onChange={(e) => setFirstShift(e.target.value)}
-        >
-          <option value="">Sélectionner...</option>
-          {shifts.map((shift) => (
-            <option key={shift.idShift} value={shift.idShift}>
-              {shift.tag}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Second Shift Dropdown */}
-      <div className="mb-3">
-        <label>Deuxième Shift :</label>
-        <select
-          className="form-control"
-          value={secondShift}
-          onChange={(e) => setSecondShift(e.target.value)}
-        >
-          <option value="">Sélectionner...</option>
-          {shifts.map((shift) => (
-            <option key={shift.idShift} value={shift.idShift}>
-              {shift.tag}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Save Button */}
-      <button className="btn btn-primary mt-4" onClick={saveInterdiction}>
-        Ajouter
-      </button>
-
-      {/* Display Interdictions */}
-      {interdictions.length > 0 && (
-        <div className="mt-4">
-          <h4>Interdictions :</h4>
-          <ul className="list-group">
-            {interdictions.map((item, index) => {
-              // Attempt to display shift tags using the shifts array
-              const first = shifts.find(s => s.idShift === item.id.idShift);
-              const second = shifts.find(s => s.idShift === item.id.idShift1);
-              return (
-                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                  {first ? first.tag : item.id.idShift} → {second ? second.tag : item.id.idShift1}
-                  <button className="btn btn-danger btn-sm" onClick={() => removeInterdiction(item.id.idShift, item.id.idShift1)}>
-                    Supprimer
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+        <div className="mb-3">
+          <select
+              className="form-control"
+              value={firstShift}
+              onChange={(e) => setFirstShift(e.target.value)}
+              style={{width: "50%", margin: "0 auto"}}
+          >
+            <option value="">Sélectionner le premier shift</option>
+            {shifts.map((shift) => (
+                <option key={shift.idShift} value={shift.idShift}>
+                  {shift.tag}
+                </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {/* Next Button */}
-      <button className="btn btn-success mt-4" onClick={() => navigate("/needs-setup")}>
-        Suivant
-      </button>
-    </div>
+        <div className="mb-3">
+          <select
+              className="form-control"
+              value={secondShift}
+              onChange={(e) => setSecondShift(e.target.value)}
+              style={{width: "50%", margin: "0 auto"}}
+          >
+            <option value="">Sélectionner le deuxième shift</option>
+            {shifts.map((shift) => (
+                <option key={shift.idShift} value={shift.idShift}>
+                  {shift.tag}
+                </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="d-flex justify-content-evenly mb-2">
+          <button className="btn btn-success" onClick={() => navigate("/needs-setup")}>
+            Suivant
+          </button>
+          <button className="btn btn-primary" onClick={saveInterdiction}>
+            + Ajouter
+          </button>
+          <button className="btn btn-danger" onClick={() => setInterdictions([])}>
+            Supprimer tout
+          </button>
+        </div>
+
+        {interdictions.length > 0 && (
+            <div className="mt-4">
+              <h4>Liste des shifts interdits :</h4>
+              <ul className="list-unstyled">
+                {interdictions.map((item, index) => {
+                  const first = shifts.find((s) => s.idShift === item.id.idShift);
+                  const second = shifts.find((s) => s.idShift === item.id.idShift1);
+                  return (
+                      <li
+                          key={index}
+                          className="d-flex align-items-center justify-content-between border-bottom py-1"
+                      >
+                        <div>
+                          <strong>{first ? first.tag : item.id.idShift}</strong> →{" "}
+                          <strong>{second ? second.tag : item.id.idShift1}</strong>
+                        </div>
+                        <button
+                            className="btn p-0 d-flex align-items-center justify-content-center"
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              background: "none",
+                              border: "none",
+                              color: "black",
+                            }}
+                            onClick={() => removeInterdiction(item.id.idShift, item.id.idShift1)}
+                        >
+                          ✖
+                        </button>
+                      </li>
+                  );
+                })}
+              </ul>
+            </div>
+        )}
+      </div>
   );
 };
-
 export default ForbiddenShiftsPage;

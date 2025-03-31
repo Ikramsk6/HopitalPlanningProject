@@ -1,6 +1,7 @@
 package com.example.HopitalPlanningProject.services;
 
 import com.example.HopitalPlanningProject.model.InterdictionPrecedent;
+import com.example.HopitalPlanningProject.model.InterdictionPrecedentId;
 import com.example.HopitalPlanningProject.repositories.InterdictionPrecedentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class InterdictionPrecedentService {
         return interdictionPrecedentRepository.findAll();
     }
 
-    public Optional<InterdictionPrecedent> getInterdictionById(int id) {
+    public Optional<InterdictionPrecedent> getInterdictionById(InterdictionPrecedentId id) {
         return interdictionPrecedentRepository.findById(id);
     }
 
@@ -26,7 +27,9 @@ public class InterdictionPrecedentService {
         return interdictionPrecedentRepository.save(interdictionPrecedent);
     }
 
-    public void deleteInterdiction(int id) {
+
+
+    public void deleteInterdiction(InterdictionPrecedentId id) {
         interdictionPrecedentRepository.deleteById(id);
     }
 }

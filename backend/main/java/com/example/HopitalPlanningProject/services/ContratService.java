@@ -36,4 +36,24 @@ public class ContratService {
     public void deleteContrat(int id) {
         contratRepository.deleteById(id);
     }
+
+    /**
+     * Initialise les contrats par défaut (100% et 50%) s'ils n'existent pas déjà dans la base de données.
+     */
+    public void initializeDefaultContrats() {
+        // Vérifier si les contrats de base existent déjà
+        if (!contratRepository.existsByDescriptionContrat("100%")) {
+            Contrat contrat100 = new Contrat();
+            contrat100.setDescriptionContrat("100%");
+            contrat100.setPourcentageTravail(100.00);
+            contratRepository.save(contrat100);
+        }
+
+        if (!contratRepository.existsByDescriptionContrat("50%")) {
+            Contrat contrat50 = new Contrat();
+            contrat50.setDescriptionContrat("50%");
+            contrat50.setPourcentageTravail(50.00);
+            contratRepository.save(contrat50);
+        }
+    }
 }

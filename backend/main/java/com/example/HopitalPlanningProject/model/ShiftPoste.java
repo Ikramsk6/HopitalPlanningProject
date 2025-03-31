@@ -3,6 +3,8 @@ package com.example.HopitalPlanningProject.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -26,4 +28,8 @@ public class ShiftPoste {
 
     @Column(name = "Poste", length = 50, nullable = false)
     private String poste;
+
+    // Relation OneToMany avec InterdictionPrecedent
+    @OneToMany(mappedBy = "id.idShift", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InterdictionPrecedent> interdictionsPrecedentes;
 }
