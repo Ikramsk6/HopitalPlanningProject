@@ -1,7 +1,11 @@
 package com.example.HopitalPlanningProject.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -12,7 +16,7 @@ import lombok.*;
 public class Contrat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_contrat")
+    @Column(name = "idContrat")
     private int idContrat;
 
     @Column(name = "pourcentage_travail")
@@ -24,4 +28,8 @@ public class Contrat {
     @OneToOne
     @JoinColumn(name = "id_roulement", nullable = true, unique = true)
     private Roulement roulement;
+
+    @OneToMany(mappedBy = "contrat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // Sérialisation de la liste des personnes
+    private List<Personne> personnes = new ArrayList<>();
 }

@@ -21,7 +21,11 @@ const ShiftCreationPage = () => {
     const fetchShifts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("http://localhost:8080/api/shiftsPostes");
+            const response = await axios.get("http://localhost:8080/api/shiftsPostes", {
+                headers: { "Cache-Control": "no-cache" },
+            });
+            console.log("Réponse de l'API shiftsPostes :", response.data); // Ajoutez cette ligne pour afficher la réponse
+
             setShifts(response.data.reverse());
             setLoading(false);
         } catch (error) {

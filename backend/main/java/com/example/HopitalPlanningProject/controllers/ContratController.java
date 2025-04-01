@@ -25,7 +25,7 @@ public class ContratController {
 
     @GetMapping("/{id}")
     public Optional<Contrat> getContratById(@PathVariable int id) {
-        return contratService.getContratById(id);
+        return Optional.ofNullable(contratService.getContratById(id));
     }
 
     @PostMapping

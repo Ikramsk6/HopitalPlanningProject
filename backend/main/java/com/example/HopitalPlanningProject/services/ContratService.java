@@ -1,5 +1,6 @@
 package com.example.HopitalPlanningProject.services;
 
+import com.example.HopitalPlanningProject.erreurs.ContratNotFoundException;
 import com.example.HopitalPlanningProject.model.Contrat;
 import com.example.HopitalPlanningProject.repositories.ContratRepository;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,10 @@ public class ContratService {
         return contratRepository.findAll();
     }
 
-    public Optional<Contrat> getContratById(int id) {
-        return contratRepository.findById(id);
+    public Contrat getContratById(int id) {
+        return contratRepository.findById(id)
+                .orElseThrow(() -> new ContratNotFoundException("Contrat not found with id: " + id));
     }
-
     public Contrat saveContrat(Contrat contrat) {
         return contratRepository.save(contrat); // Sauvegarde le contrat dans la base de données
     }
@@ -54,6 +55,16 @@ public class ContratService {
             contrat50.setDescriptionContrat("50%");
             contrat50.setPourcentageTravail(50.00);
             contratRepository.save(contrat50);
+        }
+    }
+    public Contrat createOrGetContrat(Contrat contrat) {
+        if (contrat.getIdContrat() != 0) {
+            // Si l'ID est valide, on tente de récupérer le contrat existant
+            return contratRepository.findById(contrat.getIdContrat())
+                    .orElseThrow(() -> new IllegalArgumentException("Contrat non trouvé"));
+        } else {
+            // Sinon, on crée un nouveau contrat
+            return contratRepository.save(contrat);
         }
     }
 }

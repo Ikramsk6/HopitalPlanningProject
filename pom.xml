@@ -28,6 +28,7 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+
 		<!-- Spring Boot JPA pour la gestion de la base de données -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
