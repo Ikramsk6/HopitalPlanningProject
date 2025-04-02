@@ -1,6 +1,7 @@
 package com.example.HopitalPlanningProject.services;
 
 import com.example.HopitalPlanningProject.model.*;
+import com.example.HopitalPlanningProject.repositories.RoulementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class RoulementGeneratorService {
     private final InterdictionPrecedentService interdictionPrecedentService;
     private final SequenceShiftService sequenceShiftService;
     private final Random random = new Random();
+    private RoulementRepository roulementRepository;
 
     @Autowired
     public RoulementGeneratorService(RoulementService roulementService,
@@ -289,6 +291,7 @@ public class RoulementGeneratorService {
             try {
                 Roulement r = generateRoulement();
                 validRoulements.add(r);
+                roulementRepository.save(r);
             } catch (Exception e) {
                 System.out.println("Échec de génération d'un roulement : " + e.getMessage());
             }
@@ -307,6 +310,7 @@ public class RoulementGeneratorService {
         }
 
         // Retourne la liste des roulements valides.
+
         return validRoulements;
     }
 

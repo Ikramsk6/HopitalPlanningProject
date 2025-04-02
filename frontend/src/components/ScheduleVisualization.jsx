@@ -28,7 +28,7 @@ const ScheduleMonth = () => {
   const [contrat, setContrat] = useState("");
   const [tailleRoul, setTailleRoul] = useState("");
 
-  // Récupérer les shifts
+  // Fonction pour récupérer les shifts
   const fetchShifts = useCallback(async () => {
     setLoading(true);
     try {
@@ -49,7 +49,7 @@ const ScheduleMonth = () => {
     }
   }, []);
 
-  // Récupérer les personnes
+  // Fonction pour récupérer les personnes
   const fetchPerson = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/personnes");
@@ -105,11 +105,12 @@ const ScheduleMonth = () => {
     return days;
   };
 
+  // Déclaration de daysOfMonth AVANT son utilisation dans useEffect
   const daysOfMonth = generateDays();
 
-  // Initialisation du planning et des besoins une fois que les personnes sont chargées
+  // Initialisation du planning et des besoins seulement si schedule est vide
   useEffect(() => {
-    if (person.length > 0) {
+    if (person.length > 0 && schedule.length === 0) {
       const initialSchedule = person.map(() => ({
         weeks: new Array(daysOfMonth.length).fill("")
       }));
@@ -123,7 +124,7 @@ const ScheduleMonth = () => {
       console.log("Initial Needs :", initialNeeds);
       setNeeds(initialNeeds);
     }
-  }, [person, daysOfMonth, shifts]);
+  }, [person, daysOfMonth, shifts, schedule.length]);
 
   // Fonction pour générer des données aléatoires dans le planning
   const fillRandomData = async (contratParam, nbRoulParam, tailleRoulParam) => {
@@ -325,7 +326,7 @@ const ScheduleMonth = () => {
                   <thead className="table-light">
                   <tr>
                     <th>Shift</th>
-                    {daysOfMonth.map((day, index) => (
+                    {daysOfMonth.map((day) => (
                         <th key={day.dayFormatted}>{day.dayFormatted}</th>
                     ))}
                   </tr>
