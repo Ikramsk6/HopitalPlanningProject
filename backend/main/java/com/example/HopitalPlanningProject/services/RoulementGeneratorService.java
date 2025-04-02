@@ -38,6 +38,28 @@ public class RoulementGeneratorService {
         this.sequenceShiftService = sequenceShiftService;
     }
 
+    // Cette méthode est ajoutée pour récupérer la liste des roulements générés
+    public List<Roulement> getGeneratedRoulements() {
+        return new ArrayList<>(generatedRoulements); // On fait une copie pour éviter les modifications externes
+    }
+
+    // Cette méthode permet d'ajouter un roulement à la liste des roulements générés
+    private List<Roulement> generatedRoulements = new ArrayList<>();
+
+    public void addGeneratedRoulement(Roulement roulement) {
+        generatedRoulements.add(roulement);
+    }
+
+
+    // Cette méthode vide la liste des roulements générés
+    public void clearGeneratedRoulements() {
+        generatedRoulements.clear();
+    }
+
+
+
+
+
     /**
      * Génère un roulement complet.
      * On part du principe que la propriété tailleRoulement de l'objet Roulement contient initialement
@@ -257,11 +279,12 @@ public class RoulementGeneratorService {
     }
 
     /**
-     * Génère plusieurs roulements valides, affiche le nombre total et présente une dizaine d'exemples.
+     * Génère plusieurs roulements valides, retourne la liste et affiche une dizaine d'exemples.
      *
      * @param count Le nombre de roulements à générer.
+     * @return La liste des roulements générés.
      */
-    public void generateMultipleRoulements(int count) {
+    public List<Roulement> generateMultipleRoulements(int count) {
         List<Roulement> validRoulements = new ArrayList<>();
         int attempts = 0;
         while (validRoulements.size() < count && attempts < count * 5) {
@@ -275,8 +298,9 @@ public class RoulementGeneratorService {
         }
         System.out.println(validRoulements.size() + " roulements valides générés sur " + attempts + " tentatives.");
         // Affiche une dizaine d'exemples parmi les roulements trouvés.
-        for (int i = 0; i < Math.min(validRoulements.size(), validRoulements.size()); i++) {
+        for (int i = 0; i < Math.min(validRoulements.size(), 10); i++) {
             System.out.println("Exemple Roulement " + (i+1) + " : " + validRoulements.get(i));
         }
+        return validRoulements;
     }
 }
