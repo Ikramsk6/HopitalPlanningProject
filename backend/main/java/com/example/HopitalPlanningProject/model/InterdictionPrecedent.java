@@ -1,5 +1,7 @@
 package com.example.HopitalPlanningProject.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,13 +11,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class InterdictionPrecedent {
     @EmbeddedId
     private InterdictionPrecedentId id;
 
-    // Relation ManyToOne avec ShiftPoste
     @ManyToOne
-    @JoinColumn(name = "idShift", insertable = false, updatable = false)
+    @MapsId("idShift")
+    @JoinColumn(name = "id_shift")
     private ShiftPoste shiftPoste;
-}
 
+    @ManyToOne
+    @MapsId("idShift1")
+    @JoinColumn(name = "id_shift1")
+    private ShiftPoste shiftPoste1;
+}

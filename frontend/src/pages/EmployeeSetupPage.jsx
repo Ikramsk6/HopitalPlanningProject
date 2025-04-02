@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -22,20 +22,24 @@ const PersonneSetupPage = () => {
     const [error, setError] = useState(null);
 
     // Récupérer les shifts disponibles
-    const fetchShifts = async () => {
+    const fetchShifts = useCallback(async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await axios.get("http://localhost:8080/api/shiftsPostes", {
                 headers: { "Cache-Control": "no-cache" }
             });
-            setShifts(response.data);
-            setLoading(false);
+            if (Array.isArray(response.data)) {
+                setShifts(response.data);
+            } else {
+                throw new Error("Données invalides reçues du serveur.");
+            }
         } catch (error) {
             console.error("Erreur lors du chargement des shifts :", error);
             setError("Erreur lors du chargement des shifts.");
+        } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // Récupérer les contrats disponibles
     const fetchContracts = async () => {
@@ -84,6 +88,7 @@ const PersonneSetupPage = () => {
 
             // Première requête : création de la personne
             const response1 = await axios.post("http://localhost:8080/api/personnes", personneSansContrat);
+            console.log()
 
             // Récupérer la personne créée à partir de la réponse
             const personneCreee = response1.data;

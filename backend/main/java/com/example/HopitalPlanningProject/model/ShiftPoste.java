@@ -1,5 +1,8 @@
 package com.example.HopitalPlanningProject.model;
 
+import com.example.HopitalPlanningProject.model.InterdictionPrecedent;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "idShift")
 public class ShiftPoste {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +22,7 @@ public class ShiftPoste {
     private int idShift;
 
     @Column(name = "Travail")
-    private boolean travail; // LOGICAL → boolean en Java
+    private boolean travail;
 
     @Column(name = "Tag", length = 3, nullable = false)
     private String tag;
@@ -29,7 +33,6 @@ public class ShiftPoste {
     @Column(name = "Poste", length = 50, nullable = false)
     private String poste;
 
-    // Relation OneToMany avec InterdictionPrecedent
-    @OneToMany(mappedBy = "id.idShift", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shiftPoste", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InterdictionPrecedent> interdictionsPrecedentes;
 }

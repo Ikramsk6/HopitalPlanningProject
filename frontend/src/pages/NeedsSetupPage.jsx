@@ -1,45 +1,53 @@
-import React, {useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 
 const NeedsSetupPage = () => {
     const navigate = useNavigate();
     const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-    const [shifts, setShifts] = useState([]); // Liste des shifts récupérée
-    const [needs, setNeeds] = useState({}); // Besoins à configurer
+    const [shifts, setShifts] = useState([]);
+    const [needs, setNeeds] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Récupérer les shifts depuis la BDD
-    useEffect(() => {
-        const fetchShifts = async () => {
-            try {
-                const response = await axios.get("http://localhost:8080/api/shiftsPostes"); // URL API
+
+    const fetchShifts = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get("http://localhost:8080/api/shiftsPostes", {
+                headers: { "Cache-Control": "no-cache" }
+            });
+            if (Array.isArray(response.data)) {
                 setShifts(response.data);
-            } catch (error) {
-                console.error("Erreur lors de la récupération des shifts :", error);
-                alert("Erreur lors de la récupération des shifts.");
+            } else {
+                throw new Error("Données invalides reçues du serveur.");
             }
-        };
+        } catch (error) {
+            console.error("Erreur lors du chargement des shifts :", error);
+            setError("Erreur lors du chargement des shifts.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
+    useEffect(() => {
         fetchShifts();
-    }, []); // Exécuter au montage du composant
+    }, [fetchShifts]);
 
-    // Initialiser les besoins avec des valeurs par défaut (0) après la récupération des shifts
     useEffect(() => {
         if (shifts.length > 0) {
-            const initialNeeds = {};
-            shifts.forEach((shift) => {
-                jours.forEach((jour, i) => {
-                    initialNeeds[`${shift.idShift}-${i}`] = 0; // Initialisation avec 0 pour chaque shift et jour
+            const initialNeeds = shifts.reduce((acc, shift) => {
+                jours.forEach((_, i) => {
+                    acc[`${shift.idShift}-${i}`] = 0;
                 });
-            });
+                return acc;
+            }, {});
             setNeeds(initialNeeds);
         }
-    }, [shifts]); // Lorsque la liste des shifts change, réinitialiser les besoins
-
+    }, [shifts]);
 
     const onNext = () => {
-        navigate("/new-schedule");  // Remplacez par le chemin réel vers la page suivante
+        navigate("/schedule-visualization");
     };
 
     const handleNeedChange = (shiftId, dayIndex, value) => {
@@ -51,9 +59,9 @@ const NeedsSetupPage = () => {
 
     const handleSubmit = async () => {
         try {
-            await axios.post("http://localhost:8080/api/submitNeeds", needs); // URL API pour soumettre les besoins
+            await axios.post("http://localhost:8080/api/submitNeeds", needs);
             alert("Besoins enregistrés avec succès !");
-            navigate("/nextPage"); // Naviguer vers une autre page après soumission
+            onNext();
         } catch (error) {
             console.error("Erreur lors de la soumission des besoins :", error);
             alert("Erreur lors de la soumission des besoins.");
@@ -61,37 +69,65 @@ const NeedsSetupPage = () => {
     };
 
     return (
-        <div>
+        <div style={{ padding: "20px", textAlign: "center" }}>
             <h1>Configuration des besoins</h1>
-            <table>
-                <thead>
-                <tr>
-                    <th>Shift</th>
-                    {jours.map((jour) => (
-                        <th key={jour}>{jour}</th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {shifts.map((shift) => (
-                    <tr key={shift.idShift}>
-                        <td>{shift.name}</td>
-                        {jours.map((jour, i) => (
-                            <td key={`${shift.idShift}-${i}`}>
-                                <input
-                                    type="number"
-                                    value={needs[`${shift.idShift}-${i}`] || 0}
-                                    onChange={(e) =>
-                                        handleNeedChange(shift.idShift, i, Number(e.target.value))
-                                    }
-                                />
-                            </td>
+            {loading && <p>Chargement des shifts...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {!loading && !error && (
+                <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
+                    <thead>
+                    <tr style={{ backgroundColor: "#f4f4f4" }}>
+                        <th style={{ padding: "10px", border: "1px solid #ddd" }}>Shift</th>
+                        {jours.map((jour) => (
+                            <th key={jour} style={{ padding: "10px", border: "1px solid #ddd" }}>
+                                {jour}
+                            </th>
                         ))}
                     </tr>
-                ))}
-                </tbody>
-            </table>
-            <button onClick={handleSubmit}>Soumettre</button>
+                    </thead>
+                    <tbody>
+
+                    {shifts.map((shift) => (
+                        <tr key={shift.idShift} style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
+                            <td style={{ padding: "10px", border: "1px solid #ddd" }}>{shift.name}</td>
+                            {jours.map((jour, i) => (
+                                <td key={`${shift.idShift}-${i}`} style={{ padding: "10px", border: "1px solid #ddd" }}>
+                                    <input
+                                        type="number"
+                                        value={needs[`${shift.idShift}-${i}`] || 0}
+                                        onChange={(e) =>
+                                            handleNeedChange(shift.idShift, i, Number(e.target.value))
+                                        }
+                                        style={{
+                                            width: "60px",
+                                            padding: "5px",
+                                            textAlign: "center",
+                                            borderRadius: "5px",
+                                            border: "1px solid #ccc",
+                                        }}
+                                    />
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            )}
+            <button
+                onClick={handleSubmit}
+                disabled={loading}
+                style={{
+                    marginTop: "20px",
+                    padding: "10px 20px",
+                    backgroundColor: "#007bff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                }}
+            >
+                Soumettre
+            </button>
         </div>
     );
 };
