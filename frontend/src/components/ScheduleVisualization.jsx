@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { FaPlay, FaCalendarAlt, FaChartBar, FaCheckCircle } from "react-icons/fa";
-import { Modal, Form, Button as RBButton } from "react-bootstrap"; // Utilisation de react-bootstrap
+import { Modal, Form, Button as RBButton } from "react-bootstrap";
+import Button from "./Button"; // Votre composant custom Button
 
 const ScheduleMonth = () => {
   const month = "March 2025";
-  const [shifts, setShifts] = useState([]);  // État pour les shifts récupérés
+  const [shifts, setShifts] = useState([]); // État pour les shifts récupérés
   const [person, setPerson] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,12 +56,12 @@ const ScheduleMonth = () => {
     fetchPerson();
   }, [fetchShifts, fetchPerson]);
 
-  // Fonction pour générer les jours du mois
+  // Génération des jours du mois (incluant les jours du mois suivant pour compléter la dernière semaine)
   const generateDays = () => {
     const days = [];
     const weekDays = ["D", "L", "M", "M", "J", "V", "S"];
     const year = 2025;
-    const monthIndex = 3; // Mars
+    const monthIndex = 3; // Mars (les mois commencent à 0)
     const firstDayOfMonth = new Date(year, monthIndex, 1);
     let startDay = 1;
 
@@ -80,7 +81,6 @@ const ScheduleMonth = () => {
       });
     }
 
-    // Gestion des jours restants dans la semaine (compléter la dernière semaine)
     const remainingDaysInWeek = 7 - (days.length % 7);
     if (remainingDaysInWeek < 7) {
       for (let day = 1; day <= remainingDaysInWeek; day++) {
@@ -96,8 +96,9 @@ const ScheduleMonth = () => {
     return days;
   };
 
-  const daysOfMonth = generateDays(); // Appel correct à generateDays()
+  const daysOfMonth = generateDays();
 
+  // Initialiser le schedule une fois que les personnes sont chargées
   useEffect(() => {
     // Initialiser schedule uniquement si 'person' est non vide
     if (person.length > 0) {
@@ -114,22 +115,27 @@ const ScheduleMonth = () => {
     }
   }, [person, daysOfMonth]);  // Mettre à jour schedule uniquement lorsque 'person' ou 'daysO
 
-
-
-
   // Fonction pour générer des données aléatoires dans le planning
   const fillRandomData = async (contratParam, nbRoulParam, tailleRoulParam) => {
     try {
       // Appel à l'API pour générer le nombre de roulements spécifié
       const response = await axios.post(`http://localhost:8080/api/roulements/generate/${nbRoulParam}`);
-      const generatedRoulements = response.data; // Supposons que c'est un tableau de roulements
+      const generatedRoulements = response.data; // Supposons que c'est un tableau de roulements avec planningRepos (tableau d'IDs)
       console.log("Roulements générés :", generatedRoulements);
-      // Affectation aléatoire : pour chaque personne, on assigne un roulement au hasard
+
+      // Fonction pour transformer un ID en tag grâce aux shifts récupérés
+      const getShiftTagById = (id) => {
+        const shift = shifts.find(shift => shift.idShift === id);
+        console.log(shift)
+        return shift.tag ? shift.tag : "Inconnu";
+      };
+
+      // Affectation aléatoire : pour chaque personne, on assigne un roulement au hasard,
+      // puis on transforme chaque valeur en tag (ou "Repos" si la valeur vaut -1)
       const newSchedule = person.map(() => {
         const randomRoulement = generatedRoulements[Math.floor(Math.random() * generatedRoulements.length)];
-        // Supposons que le roulement possède une propriété planningRepos qui est un tableau d'identifiants de shifts
         return {
-          weeks: randomRoulement.planningRepos.map(val => (val === -1 ? "Repos" : `Shift ${val}`))
+          weeks: randomRoulement.planningRepos.map(val => (val === -1 ? "Repos" : getShiftTagById(val)))
         };
       });
       setSchedule(newSchedule);
@@ -141,25 +147,22 @@ const ScheduleMonth = () => {
 
   const handleInputChange = (e, rowIndex, dayIndex) => {
     const updatedSchedule = [...schedule];
-
-    // Vérifier que rowIndex et weeks existent avant de faire l'assignation
     if (updatedSchedule[rowIndex] && updatedSchedule[rowIndex].weeks) {
       updatedSchedule[rowIndex].weeks[dayIndex] = e.target.value.toUpperCase();
       setSchedule(updatedSchedule);
-      console.log(updatedSchedule)
     } else {
       console.error("Erreur : L'objet weeks n'est pas défini pour cet index de ligne.");
     }
   };
 
   const calculateShiftSummary = () => {
-    return schedule.map(person => {
+    return schedule.map(personSchedule => {
       const shiftOptions = shifts.map(shift => shift.name);
       const shiftCount = shiftOptions.reduce((acc, shift) => {
-        acc[shift] = person.weeks.filter(day => day === shift).length;
+        acc[shift] = personSchedule.weeks.filter(day => day === shift).length;
         return acc;
       }, {});
-      return { name: person.name, ...shiftCount };
+      return { name: personSchedule.name, ...shiftCount };
     });
   };
 
@@ -218,7 +221,6 @@ const ScheduleMonth = () => {
                     onChange={(e) => setNumRoul(e.target.value)}
                 />
               </Form.Group>
-
               <Form.Group className="mb-3" controlId="contrat">
                 <Form.Label>Contrat</Form.Label>
                 <Form.Control
@@ -228,17 +230,15 @@ const ScheduleMonth = () => {
                     onChange={(e) => setContrat(e.target.value)}
                 />
               </Form.Group>
-
               <Form.Group className="mb-3" controlId="tailleRoul">
-                <Form.Label>Taille de roulement</Form.Label>
+                <Form.Label>Taille de roulement (en semaines)</Form.Label>
                 <Form.Control
                     type="number"
-                    placeholder="Entrez la taille de roulement (en semaines)"
+                    placeholder="Entrez la taille de roulement"
                     value={tailleRoul}
                     onChange={(e) => setTailleRoul(e.target.value)}
                 />
               </Form.Group>
-
               <RBButton variant="primary" type="submit">
                 Soumettre
               </RBButton>
@@ -275,9 +275,9 @@ const ScheduleMonth = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {person.map((person, rowIndex) => (
+                {person.map((p, rowIndex) => (
                     <tr key={rowIndex}>
-                      <td className="fw-bold">{`${person.nom} ${person.prenom}`}</td>
+                      <td className="fw-bold">{`${p.nom} ${p.prenom}`}</td>
                       {daysOfMonth.map((day, dayIndex) => (
                           <td key={dayIndex}>
                             <input
@@ -299,10 +299,7 @@ const ScheduleMonth = () => {
         {activePage === "synthese" && (
             <div className="table-responsive">
               <br /><br />
-              <table
-                  className="table table-bordered table-md text-center"
-                  style={{ fontSize: "12px", borderCollapse: "collapse" }}
-              >
+              <table className="table table-bordered table-md text-center" style={{ fontSize: "12px", borderCollapse: "collapse" }}>
                 <thead className="table-light">
                 <tr>
                   <th className="px-1">Nom</th>
@@ -313,9 +310,7 @@ const ScheduleMonth = () => {
                 <tr>
                   <th className="px-1"></th>
                   {shifts.map((shift, index) => (
-                      <th key={index} className="px-2 bg-dark text-white">
-                        {shift.name}
-                      </th>
+                      <th key={index} className="px-2 bg-dark text-white">{shift.name}</th>
                   ))}
                 </tr>
                 </thead>
@@ -324,10 +319,7 @@ const ScheduleMonth = () => {
                     <tr key={rowIndex}>
                       <td className="fw-bold">{row.name}</td>
                       {shifts.map((shift, index) => (
-                          <td
-                              key={index}
-                              style={{ fontWeight: "bold", color: "black", backgroundColor: "white" }}
-                          >
+                          <td key={index} style={{ fontWeight: "bold", color: "black", backgroundColor: "white" }}>
                             {row[shift.name]}
                           </td>
                       ))}
