@@ -44,7 +44,7 @@ public class RoulementGeneratorService {
      * le nombre de semaines souhaité (entre 2 et 12), puis on convertit cette valeur en jours.
      * Si le nombre de semaines est impair, on ajoute une semaine fictive pour obtenir un nombre pair, puis on la retire.
      *
-     * @return Le roulement généré.
+     * @return Le roulement généré.x
      */
     public Roulement generateRoulement() {
         // Création initiale du roulement et enregistrement
