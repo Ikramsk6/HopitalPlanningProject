@@ -58,7 +58,7 @@ const ForbiddenShiftsPage = () => {
       };
       console.log(payload)
       await axios.post("http://localhost:8080/api/interdictionsPrecedents", payload);
-      fetchInterdictions();
+      await fetchInterdictions();
       setFirstShift("");
       setSecondShift("");
     } catch (error) {

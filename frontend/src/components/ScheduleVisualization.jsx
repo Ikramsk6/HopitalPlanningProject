@@ -5,7 +5,16 @@ import { Modal, Form, Button as RBButton } from "react-bootstrap";
 import Button from "./Button"; // Votre composant custom Button
 
 const ScheduleMonth = () => {
-  const month = "March 2025";
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const [selectedMonth, setSelectedMonth] = useState(2); // 0-indexé : 2 = March
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const[month, setMonth] =useState([])
+
+  const monthText = `${months[selectedMonth]} ${selectedYear}`;
+
   const [shifts, setShifts] = useState([]); // État pour les shifts récupérés
   const [person, setPerson] = useState([]);
   const [schedule, setSchedule] = useState([]);
@@ -60,13 +69,13 @@ const ScheduleMonth = () => {
   const generateDays = () => {
     const days = [];
     const weekDays = ["D", "L", "M", "M", "J", "V", "S"];
-    const year = 2025;
-    const monthIndex = 3; // Mars (les mois commencent à 0)
+    const year = selectedYear;
+    const monthIndex = selectedMonth; // Utilisation du mois sélectionné
     const firstDayOfMonth = new Date(year, monthIndex, 1);
     let startDay = 1;
 
     if (firstDayOfMonth.getDay() !== 1) {
-      const offset = (firstDayOfMonth.getDay() === 0) ? 1 : (8 - firstDayOfMonth.getDay());
+      const offset = firstDayOfMonth.getDay() === 0 ? 1 : (8 - firstDayOfMonth.getDay());
       startDay = 1 + offset;
     }
 
@@ -81,6 +90,7 @@ const ScheduleMonth = () => {
       });
     }
 
+    // Compléter la dernière semaine si nécessaire
     const remainingDaysInWeek = 7 - (days.length % 7);
     if (remainingDaysInWeek < 7) {
       for (let day = 1; day <= remainingDaysInWeek; day++) {
@@ -92,7 +102,6 @@ const ScheduleMonth = () => {
         });
       }
     }
-
     return days;
   };
 
@@ -194,13 +203,67 @@ const ScheduleMonth = () => {
     fillRandomData(contrat, numRoul, tailleRoul);
   };
 
+  const handleMonthChange = (e) => {
+    setSelectedMonth(Number(e.target.value));
+  };
+
+  // Ajout d'un state pour le mois sélectionné
+  // Vous pouvez également ajouter un state pour l'année si nécessaire
+
+
+
+
+
+    // Nouvelle fonction : Calcul des besoins par jour
+    const calculateDailyCoverage = () => {
+      const dailyCoverage = {};
+
+      // Initialiser la structure pour chaque jour
+      daysOfMonth.forEach(day => {
+        dailyCoverage[day.dayFormatted] = {};
+        shifts.forEach(shift => {
+          dailyCoverage[day.dayFormatted][shift.name] = 0;
+        });
+      });
+
+      // Compter les personnes par shift chaque jour
+      schedule.forEach((personSchedule, personIndex) => {
+        personSchedule.weeks.forEach((shiftTag, dayIndex) => {
+          const day = daysOfMonth[dayIndex]?.dayFormatted;
+          const shift = shifts.find(s => s.tag === shiftTag);
+
+          if (day && shift) {
+            dailyCoverage[day][shift.name]++;
+          }
+        });
+      });
+
+      return dailyCoverage;
+    };
+
+    const summaryData = calculateShiftSummary();
+    const dailyCoverage = calculateDailyCoverage();
+
+
+
   return (
       <div className="container mt-3">
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <h3 className="text-primary">{month}</h3>
+          <div>
+            <h3 className="text-primary">{monthText || month}</h3>
+            {/* Sélection du mois */}
+            <Form.Group controlId="monthSelect" className="mt-2">
+              <Form.Label>Sélectionnez le mois :</Form.Label>
+              <Form.Control as="select" value={selectedMonth} onChange={handleMonthChange}>
+                {months.map((m, index) => (
+                    <option key={index} value={index}>{m}</option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          </div>
           {activePage === "planning" && (
               <button className="btn btn-success" onClick={handleShow}>
-                <FaPlay /> Generate
+                <FaPlay/> Generate
               </button>
           )}
         </div>
@@ -222,7 +285,6 @@ const ScheduleMonth = () => {
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="contrat">
-                <Form.Label>Contrat</Form.Label>
                 <Form.Control
                     type="text"
                     placeholder="Entrez le type de contrat"
@@ -231,7 +293,6 @@ const ScheduleMonth = () => {
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="tailleRoul">
-                <Form.Label>Taille de roulement (en semaines)</Form.Label>
                 <Form.Control
                     type="number"
                     placeholder="Entrez la taille de roulement"
@@ -239,15 +300,12 @@ const ScheduleMonth = () => {
                     onChange={(e) => setTailleRoul(e.target.value)}
                 />
               </Form.Group>
-              <RBButton variant="primary" type="submit">
-                Soumettre
-              </RBButton>
               <RBButton
-                  variant="success"
+                  variant="primary"
                   onClick={() => fillRandomData(contrat, numRoul, tailleRoul)}
                   className="mt-2"
               >
-                Valider
+                Soumettre
               </RBButton>
             </Form>
           </Modal.Body>

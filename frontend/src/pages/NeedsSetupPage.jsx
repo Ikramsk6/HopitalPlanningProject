@@ -10,13 +10,16 @@ const NeedsSetupPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-
+    // Fetch les shifts depuis l'API
     const fetchShifts = useCallback(async () => {
         setLoading(true);
         try {
             const response = await axios.get("http://localhost:8080/api/shiftsPostes", {
                 headers: { "Cache-Control": "no-cache" }
             });
+
+            console.log("Données récupérées de l'API : ", response.data);  // Vérification des données retournées
+
             if (Array.isArray(response.data)) {
                 setShifts(response.data);
             } else {
@@ -34,22 +37,28 @@ const NeedsSetupPage = () => {
         fetchShifts();
     }, [fetchShifts]);
 
+    // Initialiser le state `needs` une fois que les shifts sont récupérés
     useEffect(() => {
         if (shifts.length > 0) {
+            console.log("Shifts récupérés : ", shifts);  // Vérification des shifts dans le state
+
             const initialNeeds = shifts.reduce((acc, shift) => {
                 jours.forEach((_, i) => {
                     acc[`${shift.idShift}-${i}`] = 0;
                 });
                 return acc;
             }, {});
+            console.log("Initial Needs : ", initialNeeds);  // Vérification de l'initialisation des besoins
             setNeeds(initialNeeds);
         }
     }, [shifts]);
 
+    // Fonction pour passer à la page suivante
     const onNext = () => {
         navigate("/schedule-visualization");
     };
 
+    // Fonction pour mettre à jour les besoins
     const handleNeedChange = (shiftId, dayIndex, value) => {
         setNeeds(prevNeeds => ({
             ...prevNeeds,
@@ -57,9 +66,11 @@ const NeedsSetupPage = () => {
         }));
     };
 
+    // Fonction pour soumettre les besoins
     const handleSubmit = async () => {
         try {
-            await axios.post("http://localhost:8080/api/submitNeeds", needs);
+            console.log(needs)
+            //await axios.post("http://localhost:8080/api/submitNeeds", needs);
             alert("Besoins enregistrés avec succès !");
             onNext();
         } catch (error) {
@@ -86,30 +97,38 @@ const NeedsSetupPage = () => {
                     </tr>
                     </thead>
                     <tbody>
+                    {shifts
+                        .filter(shift => shift.travail === true)  // Filtrage des shifts avec `travail === true`
+                        .map((shift) => {
+                            console.log("Shift actuel : ", shift);  // Vérification des données de chaque shift
 
-                    {shifts.map((shift) => (
-                        <tr key={shift.idShift} style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
-                            <td style={{ padding: "10px", border: "1px solid #ddd" }}>{shift.name}</td>
-                            {jours.map((jour, i) => (
-                                <td key={`${shift.idShift}-${i}`} style={{ padding: "10px", border: "1px solid #ddd" }}>
-                                    <input
-                                        type="number"
-                                        value={needs[`${shift.idShift}-${i}`] || 0}
-                                        onChange={(e) =>
-                                            handleNeedChange(shift.idShift, i, Number(e.target.value))
-                                        }
-                                        style={{
-                                            width: "60px",
-                                            padding: "5px",
-                                            textAlign: "center",
-                                            borderRadius: "5px",
-                                            border: "1px solid #ccc",
-                                        }}
-                                    />
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                            return (
+                                <tr key={shift.idShift} style={{ backgroundColor: "#fff", borderBottom: "1px solid #ddd" }}>
+                                    {/* Affichage du nom du shift */}
+                                    <td style={{ padding: "10px", border: "1px solid #ddd" }}>
+                                        {shift.name || shift.tag || "Nom non défini"} {/* Remplacer selon l'attribut correct */}
+                                    </td>
+                                    {jours.map((jour, i) => (
+                                        <td key={`${shift.idShift}-${i}`} style={{ padding: "10px", border: "1px solid #ddd" }}>
+                                            <input
+                                                type="number"
+                                                value={needs[`${shift.idShift}-${i}`] || 0}
+                                                onChange={(e) =>
+                                                    handleNeedChange(shift.idShift, i, Number(e.target.value))
+                                                }
+                                                style={{
+                                                    width: "60px",
+                                                    padding: "5px",
+                                                    textAlign: "center",
+                                                    borderRadius: "5px",
+                                                    border: "1px solid #ccc",
+                                                }}
+                                            />
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}

@@ -28,11 +28,13 @@ const PersonneSetupPage = () => {
             const response = await axios.get("http://localhost:8080/api/shiftsPostes", {
                 headers: { "Cache-Control": "no-cache" }
             });
+
             if (Array.isArray(response.data)) {
                 setShifts(response.data);
             } else {
                 throw new Error("Données invalides reçues du serveur.");
             }
+
         } catch (error) {
             console.error("Erreur lors du chargement des shifts :", error);
             setError("Erreur lors du chargement des shifts.");
@@ -45,8 +47,7 @@ const PersonneSetupPage = () => {
     const fetchContracts = async () => {
         try {
             const response = await axios.get("http://localhost:8080/api/contrats");
-            console.log(response.data);  // Vérifie la réponse ici
-            // Vérifiez que la réponse contient un tableau
+            console.log(response.data);
             if (Array.isArray(response.data)) {
                 setContracts(response.data);
             } else {
@@ -58,7 +59,6 @@ const PersonneSetupPage = () => {
             setError("Erreur lors du chargement des contrats.");
         }
     };
-
 
     useEffect(() => {
         fetchShifts();
@@ -76,39 +76,16 @@ const PersonneSetupPage = () => {
             alert("Le contrat doit être sélectionné.");
             return;
         }
-
-        // Créer une copie de newPersonne sans le contrat
-        const personneSansContrat = { ...newPersonne, contract: null };
-
-        // Affiche la personne sans le contrat pour déboguer
-        console.log(personneSansContrat);
+        console.log(newPersonne)
 
         try {
             setLoading(true);
-
-            // Première requête : création de la personne
-            const response1 = await axios.post("http://localhost:8080/api/personnes", personneSansContrat);
-            console.log()
-
-            // Récupérer la personne créée à partir de la réponse
-            const personneCreee = response1.data;
-
-            // Deuxième requête : création ou mise à jour du contrat
-            const response2 = await axios.post("http://localhost:8080/api/contrats", newPersonne.contract);
-
-            // Ajouter le contrat à la personne (mise à jour dans la base de données ou association)
-            const contratCree = response2.data;
-            console.log("perosnne",personneCreee)
-            console.log("contrat",contratCree)
-            // Si nécessaire, associer explicitement le contrat à la personne
-            // Par exemple, ici tu peux envoyer une nouvelle requête pour associer le contrat à la personne
-            // Si l'API permet de modifier la personne après la création pour associer le contrat.
-            await axios.put(`http://localhost:8080/api/personnes/${contratCree.idContrat}`, {
-                ...personneCreee,
-                contract: contratCree
+            const response = await axios.post("http://localhost:8080/api/personnes", {
+                ...newPersonne,
+                contract: newPersonne.contract.idContrat
             });
 
-            setPersonnes([personneCreee, ...personnes]);
+            setPersonnes([response.data, ...personnes]);
 
             // Réinitialiser les champs après ajout
             setNewPersonne({
@@ -127,7 +104,6 @@ const PersonneSetupPage = () => {
             setLoading(false);
         }
     };
-
 
     // Ajouter une préférence
     const addPreference = (day, shift, service) => {
@@ -150,9 +126,7 @@ const PersonneSetupPage = () => {
 
     const deletePersonne = async (idPersonne) => {
         try {
-            // Requête pour supprimer la personne
             await axios.delete(`http://localhost:8080/api/personnes/${idPersonne}`);
-            // Mettre à jour la liste des personnes après la suppression
             setPersonnes(personnes.filter(person => person.id !== idPersonne));
         } catch (error) {
             console.error("Erreur lors de la suppression de la personne:", error);
@@ -167,9 +141,8 @@ const PersonneSetupPage = () => {
     const deleteAllPersonnes = async () => {
         try {
             setLoading(true);
-            // Suppression de toutes les personnes
             await axios.delete("http://localhost:8080/api/personnes");
-            setPersonnes([]); // Réinitialiser la liste des personnes après suppression
+            setPersonnes([]);
             setLoading(false);
         } catch (error) {
             console.error("Erreur lors de la suppression de toutes les personnes:", error);
@@ -190,6 +163,7 @@ const PersonneSetupPage = () => {
                     name="nom"
                     value={newPersonne.nom}
                     onChange={(e) => setNewPersonne({...newPersonne, nom: e.target.value})}
+
                     placeholder="Entrez le nom"
                     style={{width: '50%', margin: '0 auto'}}
                 />
@@ -252,16 +226,18 @@ const PersonneSetupPage = () => {
                 {daysOfWeek.map((day) => (
                     <div key={day}>
                         <h5>{day}</h5>
-                        {shifts.map((shift, index) => (
-                            <button
-                                key={index}
-                                className="btn btn-info m-1"
-                                onClick={() => addPreference(day, shift.type, shift.poste)}
-                                style={{margin: '5px', padding: '10px 20px', fontSize: '1rem'}}
-                            >
-                                {shift.type} - {shift.poste || "Non défini"}
-                            </button>
-                        ))}
+                        {shifts
+                            .filter(shift => shift.travail === true)
+                            .map((shift, index) => (
+                                <button
+                                    key={index}
+                                    className="btn btn-info m-1"
+                                    onClick={() => addPreference(day, shift.type, shift.poste)}
+                                    style={{margin: '5px', padding: '10px 20px', fontSize: '1rem'}}
+                                >
+                                    {shift.type}
+                                </button>
+                            ))}
                     </div>
                 ))}
             </div>
@@ -271,8 +247,7 @@ const PersonneSetupPage = () => {
                 <label>Liste des Préférences :</label>
                 <ul className="list-unstyled mt-3">
                     {newPersonne.preferences.map((preference, index) => (
-                        <li key={index}
-                            className="d-flex align-items-center justify-content-between border-bottom py-1">
+                        <li key={index} className="d-flex align-items-center justify-content-between border-bottom py-1">
                             <div>{`${preference.day} ${preference.shift} - ${preference.service}`}</div>
                             <button
                                 className="btn p-0 d-flex align-items-center justify-content-center"
@@ -332,7 +307,6 @@ const PersonneSetupPage = () => {
                 </button>
             </div>
         </div>
-
     );
 };
 

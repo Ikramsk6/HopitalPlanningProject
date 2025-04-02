@@ -24,6 +24,7 @@ public class InterdictionPrecedentService {
     }
 
     public InterdictionPrecedent createInterdiction(InterdictionPrecedent interdictionPrecedent) {
+
         return interdictionPrecedentRepository.save(interdictionPrecedent);
     }
 
