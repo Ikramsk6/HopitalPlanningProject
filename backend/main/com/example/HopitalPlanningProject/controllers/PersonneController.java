@@ -1,8 +1,6 @@
 package com.example.HopitalPlanningProject.controllers;
 
-import com.example.HopitalPlanningProject.model.Contrat;
 import com.example.HopitalPlanningProject.model.Personne;
-import com.example.HopitalPlanningProject.model.PreferencePersonnel;
 import com.example.HopitalPlanningProject.repositories.ContratRepository;  // Import du repository
 import com.example.HopitalPlanningProject.services.PersonneService;
 import com.example.HopitalPlanningProject.services.ContratService;  // Ajouter ContratService pour la gestion du contrat

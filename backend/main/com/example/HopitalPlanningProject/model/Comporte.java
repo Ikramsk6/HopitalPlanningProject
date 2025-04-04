@@ -1,14 +1,13 @@
 package com.example.HopitalPlanningProject.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
-public class NonAffinite {
+public class Comporte {
+
     @EmbeddedId
-    private NonAffiniteId id;
+    private ComporteId id;
 
     // Getters, setters et autres méthodes
 }
-
 

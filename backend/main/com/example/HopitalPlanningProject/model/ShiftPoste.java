@@ -1,6 +1,5 @@
 package com.example.HopitalPlanningProject.model;
 
-import com.example.HopitalPlanningProject.model.InterdictionPrecedent;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;

@@ -1,7 +1,7 @@
 package com.example.HopitalPlanningProject;
 
-import com.example.HopitalPlanningProject.services.RoulementGeneratorService;
 import com.example.HopitalPlanningProject.services.ContratService;
+import com.example.HopitalPlanningProject.services.RoulementGeneratorService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
